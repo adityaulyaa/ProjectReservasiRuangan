@@ -41,7 +41,7 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS | Nama | Status |
 |---|---|---|
 | SRS-01 | Fondasi Database & Struktur | [x] |
-| SRS-02 | Register (Registrasi Mandiri) | [ ] |
+| SRS-02 | Register (Registrasi Mandiri) | [x] |
 | SRS-03 | Login (Breeze) | [ ] |
 | SRS-04 | Logout | [ ] |
 | SRS-05 | Akses & Role Middleware | [ ] |
@@ -165,20 +165,20 @@ SRS-01 (schema users + model).
 ## Implementation Steps
 
 ### Backend
-- [ ] Edit `AuthenticatedSessionController@store` atau `RegisteredUserController@store`:
+- [x] Edit `AuthenticatedSessionController@store` atau `RegisteredUserController@store`:
   - Tetapkan `role='user'` & `is_verified=false` saat create
   - **Jangan auto-login** setelah register. Redirect ke `/login` + flash "Pendaftaran berhasil. Menunggu verifikasi admin."
-- [ ] Buat FormRequest `app/Http/Requests/Auth/RegisterRequest.php`:
+- [x] Buat FormRequest `app/Http/Requests/Auth/RegisterRequest.php`:
   - `name`: required|string|max:255
   - `email`: required|email|max:255|unique:users,email
   - `password`: required|confirmed|min:8
-- [ ] Model User: cast `is_verified` => boolean; default false.
+- [x] Model User: cast `is_verified` => boolean; default false.
 
 ### Routes
-- [ ] `GET /register` & `POST /register` public, middleware `guest`.
+- [x] `GET /register` & `POST /register` public, middleware `guest`.
 
 ### View
-- [ ] Edit `resources/views/auth/register.blade.php` (Breeze + Tailwind):
+- [x] Edit `resources/views/auth/register.blade.php` (Breeze + Tailwind):
   - Form: Nama, Email, Password, Confirm Password (tanpa dropdown role)
   - Client validation: required, email format, min 8 password
   - Teks: "Setelah mendaftar, akun Anda menunggu verifikasi admin."
@@ -194,12 +194,12 @@ SRS-01 (schema users + model).
 Boleh: registrasi & redirect login, flash. TIDAK boleh: login flow (SRS-03).
 
 ## Acceptance Criteria
-- [ ] POST /register valid → user tersimpan role=user, is_verified=false, redirect login
-- [ ] Email duplikat → error. Password tidak match → error. Field kosong → error.
+- [x] POST /register valid → user tersimpan role=user, is_verified=false, redirect login
+- [x] Email duplikat → error. Password tidak match → error. Field kosong → error.
 
 ## Testing Checklist
-- Positive: register valid → user tersimpan, redirect login
-- Negative: email duplikat, password tidak match, field kosong → error
+- [x] Positive: register valid → user tersimpan, redirect login
+- [x] Negative: email duplikat, password tidak match, field kosong → error
 
 ## Completion State
 Register selesai; SRS-03 Login dapat dimulai.
