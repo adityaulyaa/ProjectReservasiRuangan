@@ -7,23 +7,13 @@ use Illuminate\Http\Request;
 
 class ReportController extends Controller
 {
-    public function queue()
-    {
-    }
+    public function queue() {}
 
-    public function show($id)
-    {
-    }
+    public function show($id) {}
 
-    public function updateStatus($id, Request $request)
-    {
-    }
+    public function updateStatus($id, Request $request) {}
 
-    public function markMaintenance($id)
-    {
-    }
+    public function markMaintenance($id) {}
 
-    public function markActive($id)
-    {
-    }
+    public function markActive($id) {}
 }

@@ -60,7 +60,15 @@ git clone https://github.com/your-team/ProjectReservasi.git
 cd ProjectReservasi
 ```
 
-### 2. Install Dependencies
+### 2. Setup Automatico (Recommended)
+
+Perintah `composer run setup` membuat `.env`, key, database otomatis, migrate, dan build assets:
+
+```bash
+composer run setup
+```
+
+Alternatif manual:
 
 ```bash
 composer install
@@ -92,6 +100,12 @@ DB_PORT=3306
 DB_DATABASE=reservasi_ruangan
 DB_USERNAME=root
 DB_PASSWORD=
+```
+
+Database dibuat otomatis via command `db:create` (idempotent):
+
+```bash
+php artisan db:create
 ```
 
 ### 5. Run Migrations & Seeders

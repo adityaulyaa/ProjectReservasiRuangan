@@ -2,25 +2,42 @@
 
 namespace App\Services;
 
+use App\Enums\FacilityStatus;
+use App\Models\Facility;
+use Illuminate\Support\Str;
+
 class ReportService
 {
-    public function createReport(array $data)
+    /**
+     * Simpan foto laporan ke disk public dan return path `reports/{name}`.
+     */
+    public function handlePhotoUpload(mixed $file): string
     {
+        $extension = $file->extension();
+        $name = Str::random(32).'.'.$extension;
+
+        $file->storeAs('reports', $name, 'public');
+
+        return 'reports/'.$name;
     }
 
-    public function updateStatus($reportId, $status, $notes = null)
+    /**
+     * Tandai fasilitas berstatus 'maintenance' terkait laporan kerusakan.
+     */
+    public function markFacilityMaintenance(int $facilityId): void
     {
+        Facility::where('id', $facilityId)->update([
+            'status' => FacilityStatus::MAINTENANCE->value,
+        ]);
     }
 
-    public function markFacilityMaintenance($facilityId, $reportId)
+    /**
+     * Kembalikan fasilitas ke status 'active' setelah selesai diperbaiki.
+     */
+    public function markFacilityActive(int $facilityId): void
     {
-    }
-
-    public function markFacilityActive($facilityId, $reportId)
-    {
-    }
-
-    public function handlePhotoUpload($file)
-    {
+        Facility::where('id', $facilityId)->update([
+            'status' => FacilityStatus::ACTIVE->value,
+        ]);
     }
 }

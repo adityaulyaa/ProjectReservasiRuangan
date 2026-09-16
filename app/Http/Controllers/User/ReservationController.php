@@ -7,23 +7,13 @@ use Illuminate\Http\Request;
 
 class ReservationController extends Controller
 {
-    public function index()
-    {
-    }
+    public function index() {}
 
-    public function create()
-    {
-    }
+    public function create() {}
 
-    public function store(Request $request)
-    {
-    }
+    public function store(Request $request) {}
 
-    public function show($id)
-    {
-    }
+    public function show($id) {}
 
-    public function cancel($id)
-    {
-    }
+    public function cancel($id) {}
 }

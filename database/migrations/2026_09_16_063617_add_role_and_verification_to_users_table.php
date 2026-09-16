@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reservation_logs', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->enum('role', ['admin', 'staff', 'user'])->after('password')->default('user');
+            $table->boolean('is_verified')->after('role')->default(false);
         });
     }
 
@@ -22,6 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reservation_logs');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn(['role', 'is_verified']);
+        });
     }
 };

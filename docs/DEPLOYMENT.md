@@ -2,6 +2,18 @@
 
 Panduan deployment untuk Project Reservasi Fasilitas Kampus.
 
+## Quick Setup (Local/Development)
+
+Gunakan perintah berikut untuk setup lengkap (`.env`, key, database otomatis, migrate, build):
+
+```bash
+composer run setup
+```
+
+Script `setup` akan menjalankan: `composer install` → `cp .env.example .env` → `php artisan key:generate` → `php artisan db:create` → `php artisan migrate --force` → `npm install --ignore-scripts` → `npm run build`.
+
+Catatan: `php artisan db:create` hanya berlaku untuk driver MySQL/MariaDB dan bersifat idempotent (tidak error jika database sudah ada).
+
 ## Pre-Deployment
 
 ### 1. Code Quality Check

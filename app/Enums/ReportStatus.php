@@ -11,7 +11,7 @@ enum ReportStatus: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::NEW => 'Baru',
             self::IN_PROGRESS => 'Sedang Diproses',
             self::RESOLVED => 'Selesai',
@@ -21,7 +21,7 @@ enum ReportStatus: string
 
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::NEW => 'blue',
             self::IN_PROGRESS => 'yellow',
             self::RESOLVED => 'green',

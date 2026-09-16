@@ -40,7 +40,7 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 
 | SRS | Nama | Status |
 |---|---|---|
-| SRS-01 | Fondasi Database & Struktur | [ ] |
+| SRS-01 | Fondasi Database & Struktur | [x] |
 | SRS-02 | Register (Registrasi Mandiri) | [ ] |
 | SRS-03 | Login (Breeze) | [ ] |
 | SRS-04 | Logout | [ ] |
@@ -81,65 +81,65 @@ Tidak ada. SRS-01 adalah fondasi.
 ## Implementation Steps
 
 ### A. Konfigurasi Bisnis (`config/reservation.php`)
-- [ ] Buat file `config/reservation.php`: `open_time=07:00`, `close_time=20:00`, `slot_minutes=30`, `cancel_hours_before=2`, `max_duration_hours=8`, `photo_max_kb=2048`, `photo_mimes=[jpg,jpeg,png]`, `report_categories=[listrik,ac,furniture,plumbing,it,lainnya]`
-- [ ] Load via `config('reservation.*')` di semua modul.
+- [x] Buat file `config/reservation.php`: `open_time=07:00`, `close_time=20:00`, `slot_minutes=30`, `cancel_hours_before=2`, `max_duration_hours=8`, `photo_max_kb=2048`, `photo_mimes=[jpg,jpeg,png]`, `report_categories=[listrik,ac,furniture,plumbing,it,lainnya]`
+- [x] Load via `config('reservation.*')` di semua modul.
 
 ### B. Migration Lengkap
 #### users (tambah kolom)
-- [ ] Migration baru `add_role_and_verification_to_users_table`:
+- [x] Migration baru `add_role_and_verification_to_users_table`:
   - `$table->enum('role',['admin','staff','user'])->after('password')->default('user')`
   - `$table->boolean('is_verified')->after('role')->default(false)`
-- [ ] Model `User`: `fillable=['name','email','password','role','is_verified']`, `casts=['is_verified'=>boolean]`
+- [x] Model `User`: `fillable=['name','email','password','role','is_verified']`, `casts=['is_verified'=>boolean]`
 
 #### facilities
-- [ ] `Schema::create('facilities')`: id, name(string 100), type(string 50), location(string 100), capacity(integer), description(text), status(string 20 default 'active'), timestamps
-- [ ] Index: `['type']`, `['location']`, `['status']`, `['name']`
+- [x] `Schema::create('facilities')`: id, name(string 100), type(string 50), location(string 100), capacity(integer), description(text), status(string 20 default 'active'), timestamps
+- [x] Index: `['type']`, `['location']`, `['status']`, `['name']`
 
 #### reservations
-- [ ] `Schema::create('reservations')`: id, user_id(FK cascade), facility_id(FK cascade), reservation_date(DATE), start_time(TIME), end_time(TIME), purpose(string 255), status(string 20 default 'pending'), reject_reason(nullable), cancel_reason(nullable), processed_by(FK nullable), timestamps
-- [ ] Index gabungan `['facility_id','reservation_date','start_time']` (anti-bentrok) + index `['status']`, `['reservation_date']`, `['processed_by']`
+- [x] `Schema::create('reservations')`: id, user_id(FK cascade), facility_id(FK cascade), reservation_date(DATE), start_time(TIME), end_time(TIME), purpose(string 255), status(string 20 default 'pending'), reject_reason(nullable), cancel_reason(nullable), processed_by(FK nullable), timestamps
+- [x] Index gabungan `['facility_id','reservation_date','start_time']` (anti-bentrok) + index `['status']`, `['reservation_date']`, `['processed_by']`
 
 #### reports
-- [ ] `Schema::create('reports')`: id, user_id(FK cascade), facility_id(FK cascade), category(string 50), description(text), photo_path(nullable string 255), resolution_note(nullable string 500), status(string 20 default 'new'), processed_by(FK nullable), timestamps
-- [ ] Index: `['status']`, `['facility_id']`, `['category']`
+- [x] `Schema::create('reports')`: id, user_id(FK cascade), facility_id(FK cascade), category(string 50), description(text), photo_path(nullable string 255), resolution_note(nullable string 500), status(string 20 default 'new'), processed_by(FK nullable), timestamps
+- [x] Index: `['status']`, `['facility_id']`, `['category']`
 
 #### reservation_logs & report_logs
-- [ ] Sama struktur: id, FK ke tabel utama, actor_id(FK nullable users), action(string 50), old_status(newable), new_status(nullable), note(nullable), timestamps
+- [x] Sama struktur: id, FK ke tabel utama, actor_id(FK nullable users), action(string 50), old_status(newable), new_status(nullable), note(nullable), timestamps
 
 ### C. Auto-Create Database — Custom Command
-- [ ] Buat `app/Console/Commands/DatabaseCreateCommand.php` (signature `db:create`):
+- [x] Buat `app/Console/Commands/DatabaseCreateCommand.php` (signature `db:create`):
   - Ambil env DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE
   - Konek ke MySQL tanpa database via PDO, eksekusi `CREATE DATABASE IF NOT EXISTS reservasi_ruangan CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
   - Idempotent: jika DB sudah ada → info, tidak error
-- [ ] Tambahkan ke `composer.json` script `setup`: `["composer install","cp .env.example .env","php artisan key:generate","php artisan db:create","php artisan migrate --force","npm install --ignore-scripts","npm run build"]`
-- [ ] Perbarui `README.md` & `docs/DEPLOYMENT.md`: instruksi `composer run setup`.
+- [x] Tambahkan ke `composer.json` script `setup`: `["composer install","cp .env.example .env","php artisan key:generate","php artisan db:create","php artisan migrate --force","npm install --ignore-scripts","npm run build"]`
+- [x] Perbarui `README.md` & `docs/DEPLOYMENT.md`: instruksi `composer run setup`.
 
 ### D. Models & Relasi
-- [ ] **User**: relasi `reservations()`, `reports()`
-- [ ] **Facility**: relasi `reservations()`, `reports()`
-- [ ] **Reservation**: relasi `user()`, `facility()`, `logs()`
-- [ ] **Report**: relasi `user()`, `facility()`, `logs()`
-- [ ] Buat model `ReservationLog` dan `ReportLog` di `app/Models`
+- [x] **User**: relasi `reservations()`, `reports()`
+- [x] **Facility**: relasi `reservations()`, `reports()`
+- [x] **Reservation**: relasi `user()`, `facility()`, `logs()`
+- [x] **Report**: relasi `user()`, `facility()`, `logs()`
+- [x] Buat model `ReservationLog` dan `ReportLog` di `app/Models`
 
 ### E. Service Skeleton
-- [ ] `ReservationService::checkConflict($facilityId, $date, $start, $end, $excludeId=null): bool`
-- [ ] `ReservationService::validateTimeSlot($start, $end): array`
-- [ ] `ReservationService::createLog($reservation, $action, $old=null, $new=null, $note=null, $actorId=null): void`
-- [ ] `ReservationService::slotsForDate(): array` → ['07:00','07:30',…,'19:30']
-- [ ] `ReportService::handlePhotoUpload($file): string`
-- [ ] `ReportService::markFacilityMaintenance($facilityId)`, `markFacilityActive($facilityId)`
+- [x] `ReservationService::checkConflict($facilityId, $date, $start, $end, $excludeId=null): bool`
+- [x] `ReservationService::validateTimeSlot($start, $end): array`
+- [x] `ReservationService::createLog($reservation, $action, $old=null, $new=null, $note=null, $actorId=null): void`
+- [x] `ReservationService::slotsForDate(): array` → ['07:00','07:30',…,'19:30']
+- [x] `ReportService::handlePhotoUpload($file): string`
+- [x] `ReportService::markFacilityMaintenance($facilityId)`, `markFacilityActive($facilityId)`
 
 ### F. Storage Upload
-- [ ] Pastikan disk `local` root `storage/app`; buat `storage/app/public/reports`
-- [ ] `php artisan storage:link`
+- [x] Pastikan disk `local` root `storage/app`; buat `storage/app/public/reports`
+- [x] `php artisan storage:link`
 
 ## Acceptance Criteria
-- [ ] `php artisan migrate:fresh` membuat semua tabel benar (users dgn role/is_verified, facilities, reservations, reports, reservation_logs, report_logs, cache, jobs, sessions)
-- [ ] `php artisan db:create` bekerja dan idempotent
-- [ ] `composer run setup` membuat `.env`, key, DB, migrate otomatis
-- [ ] Models punya relasi & casts Enum
-- [ ] `config('reservation.open_time')` = '07:00'
-- [ ] `php artisan route:list` tetap 66+ route tanpa error
+- [x] `php artisan migrate:fresh` membuat semua tabel benar (users dgn role/is_verified, facilities, reservations, reports, reservation_logs, report_logs, cache, jobs, sessions)
+- [x] `php artisan db:create` bekerja dan idempotent
+- [x] `composer run setup` membuat `.env`, key, DB, migrate otomatis
+- [x] Models punya relasi & casts Enum
+- [x] `config('reservation.open_time')` = '07:00'
+- [x] `php artisan route:list` tetap 66+ route tanpa error
 
 ## Testing Checklist
 - Positive: migrations jalan, DB ter-create via command
