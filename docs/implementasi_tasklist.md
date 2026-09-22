@@ -45,7 +45,7 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-03 | Login (Breeze + Verifikasi Admin) | [x] |
 | SRS-04 | Logout | [x] |
 | SRS-05 | Akses & Role Middleware | [x] |
-| SRS-06 | Daftar Fasilitas (Public) | [ ] |
+| SRS-06 | Daftar Fasilitas (Public) | [x] |
 | SRS-07 | Cari & Filter Fasilitas (Public) | [ ] |
 | SRS-08 | Ketersediaan Fasilitas per Slot (Public) | [ ] |
 | SRS-09 | Ajukan Reservasi (+ ReservationService) | [ ] |
@@ -337,27 +337,33 @@ SRS-01 (facilities), SRS-05 (routing public).
 ## Implementation Steps
 
 ### Backend
-- [ ] `PublicController::index()` → `view('public.index', compact('facilities'))`
-- [ ] `PublicController::facilities()` → `view('public.facilities', compact('facilities'))`
-- [ ] Query: `Facility::whereIn('status',['active','maintenance'])->orderBy('name')->paginate(9)`
-- [ ] Pass `FacilityStatus::cases()` untuk badge.
+- [x] `PublicController::index()` → `view('public.index', compact('facilities'))`
+- [x] `PublicController::facilities()` → `view('public.facilities', compact('facilities'))`
+- [x] Query: `Facility::whereIn('status',['active','maintenance'])->orderBy('name')->paginate(9)`
+- [x] Pass `FacilityStatus::cases()` untuk badge.
 
 ### Routes
-- [ ] `GET /` → name `home`
-- [ ] `GET /facilities` → name `facilities.index`
+- [x] `GET /` → name `home`
+- [x] `GET /facilities` → name `facilities.index`
 
 ### View
-- [ ] `resources/views/public/index.blade.php`: hero + ringkasan + card grid fasilitas + CTA
-- [ ] `resources/views/public/facilities.blade.php`: grid kartu + pencarian form (SRS-07) + pagination
-- [ ] Component `public/facility-card`: name, type, location, capacity, deskripsi singkat; badge status (warna `FacilityStatus::color()`). Link ke halaman ketersediaan (SRS-08).
+- [x] `resources/views/public/index.blade.php`: hero + ringkasan + card grid fasilitas + CTA
+- [x] `resources/views/public/facilities.blade.php`: grid kartu + pencarian form (SRS-07) + pagination
+- [x] Component `public/facility-card`: name, type, location, capacity, deskripsi singkat; badge status (warna `FacilityStatus::color()`). Link ke halaman ketersediaan (SRS-08).
 
 ## Business Rules
 - Fasilitas `inactive` tidak ditampilkan publik (hanya active+maintenance). Tanpa detail pemohon.
 
 ## Acceptance Criteria
-- [ ] `/` menampilkan hero + fasilitas
-- [ ] `/facilities` menampilkan grid dengan badge status
-- [ ] Dapat diakses tanpa login
+- [x] `/` menampilkan hero + fasilitas
+- [x] `/facilities` menampilkan grid dengan badge status
+- [x] Dapat diakses tanpa login
+
+## Testing Checklist
+- [x] Positive: halaman `/` dan `/facilities` berhasil dirender tanpa login
+- [x] Positive: fasilitas hanya menampilkan status active dan maintenance
+- [x] Positive: daftar fasilitas diurutkan berdasarkan nama dan dipaginasi 9 data
+- [x] Negative: fasilitas inactive tidak ditampilkan publik
 
 ## Completion State
 Public list siap; SRS-07 menambah filter.
