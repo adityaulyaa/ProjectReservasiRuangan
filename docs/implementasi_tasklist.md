@@ -220,15 +220,15 @@ SRS-02, SRS-05 (redirect per role).
 ## Implementation Steps
 
 ### Backend
-- [ ] Edit `AuthenticatedSessionController@store`:
+- [x] Edit `AuthenticatedSessionController@store`:
   - Validation: `email` required|email, `password` required
   - Cari user; jika tidak ada → error generic
-  - Jika `is_verified=false` → redirect back('login') + error "Akun Anda belum diverifikasi admin."
+  - Jika `is_verified=false` → redirect back('login') + withErrors(['email' => 'Akun Anda belum diverifikasi admin.'])
   - Jika verified → attempt($credentials) + regenerate session + redirect Intended sesuai role (helper di SRS-05)
   - Jangan auto-login jika is_verified=false.
 
 ### Routes & View
-- [ ] Route Breeze login public (`guest`). View `auth/login` + link ke register + flash status.
+- [x] Route Breeze login public (`guest`). View `auth/login` + link ke register + flash status.
 
 ## Business Rules
 - Login tanpa verified → ditolak. Setelah login redirect ke dashboard sesuai role (admin→/admin/dashboard, staff→/staff/dashboard, user→/dashboard). Remember me aktif.
@@ -240,14 +240,14 @@ SRS-02, SRS-05 (redirect per role).
 Boleh: login, verifikasi gate is_verified, redirect. TIDAK boleh: logout (SRS-04).
 
 ## Acceptance Criteria
-- [ ] User verified → login → redirect sesuai role
-- [ ] User unverified → ditolak + pesan
-- [ ] Kredensial salah → error
-- [ ] Akses `/login` saat sudah login → redirect dashboard
+- [x] User verified → login → redirect sesuai role
+- [x] User unverified → ditolak + pesan
+- [x] Kredensial salah → error
+- [x] Akses `/login` saat sudah login → redirect dashboard
 
 ## Testing Checklist
-- Positive: login verified → redirect; login admin/staff → redirect sesuai role
-- Negative: user unverified → ditolak; kredensial salah → error
+- [x] Positive: login verified → redirect; login admin/staff → redirect sesuai role
+- [x] Negative: user unverified → ditolak; kredensial salah → error
 
 ## Completion State
 Login berfungsi; SRS-04 Logout, kemudian SRS-05 middleware.
