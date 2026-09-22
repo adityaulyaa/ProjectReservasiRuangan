@@ -42,7 +42,7 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 |---|---|---|
 | SRS-01 | Fondasi Database & Struktur | [x] |
 | SRS-02 | Register (Registrasi Mandiri) | [x] |
-| SRS-03 | Login (Breeze) | [ ] |
+| SRS-03 | Login (Breeze + Verifikasi Admin) | [x] |
 | SRS-04 | Logout | [ ] |
 | SRS-05 | Akses & Role Middleware | [ ] |
 | SRS-06 | Daftar Fasilitas (Public) | [ ] |
