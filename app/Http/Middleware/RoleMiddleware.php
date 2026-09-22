@@ -8,16 +8,28 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, string $role): Response
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @param  string  ...$roles
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (! auth()->check()) {
             return redirect()->route('login');
         }
 
-        if (auth()->user()->role !== $role) {
-            abort(403, 'Unauthorized access');
+        $user = auth()->user();
+
+        // Admin memiliki akses ke segalanya (Opsional, tapi biasanya membantu)
+        // Namun di SRS-05 diminta strict per peran, jadi kita cek keberadaan di array $roles
+        if (in_array($user->role->value, $roles)) {
+            return $next($request);
         }
 
-        return $next($request);
+        abort(403, 'Akses ditolak: Anda tidak memiliki peran yang diperlukan.');
     }
 }

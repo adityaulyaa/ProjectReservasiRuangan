@@ -44,7 +44,7 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-02 | Register (Registrasi Mandiri) | [x] |
 | SRS-03 | Login (Breeze + Verifikasi Admin) | [x] |
 | SRS-04 | Logout | [x] |
-| SRS-05 | Akses & Role Middleware | [ ] |
+| SRS-05 | Akses & Role Middleware | [x] |
 | SRS-06 | Daftar Fasilitas (Public) | [ ] |
 | SRS-07 | Cari & Filter Fasilitas (Public) | [ ] |
 | SRS-08 | Ketersediaan Fasilitas per Slot (Public) | [ ] |
@@ -297,24 +297,29 @@ SRS-03, SRS-04.
 ## Implementation Steps
 
 ### Backend Middleware
-- [ ] Pastikan `app/Http/Middleware/RoleMiddleware.php`: `handle(Request $request, Closure $next, string ...$roles)`
+- [x] Pastikan `app/Http/Middleware/RoleMiddleware.php`: `handle(Request $request, Closure $next, string ...$roles)`
   - Jika tidak user → redirect('/login')
   - Jika role tidak di dalam `$roles` → abort(403)
   - Membaca `$user->role` (string)
-- [ ] Helper redirect post-login: `App\Support\AuthRedirect::getDashboardForRole(Role $role)` → return path
-- [ ] (Optional) `app/Http/Middleware/VerifiedOnly` — cek `is_verified`.
+- [x] Helper redirect post-login: `App\Support\AuthRedirect::getDashboardForRole(Role $role)` → return path
+- [x] (Optional) `app/Http/Middleware/VerifiedOnly` — cek `is_verified`.
 
 ### Routing Final
-- [ ] `routes/web.php`: public `/`, `/facilities`, `/facilities/{id}/availability`; group `['middleware'=>['auth','verified']]` → `/dashboard`, `profile`, group `middleware('role:user')` → resources `reservations`, `reports`
-- [ ] `routes/admin.php`: group `['middleware'=>['auth','verified','role:admin']]` → `/admin/dashboard`, `/admin/facilities/*`, `/admin/users/*`, `/admin/reports/*`
-- [ ] `routes/staff.php`: group `['middleware'=>['auth','verified','role:staff']]` → `/staff/dashboard`, `/staff/reservations/queue*`, `/staff/reports/queue*`
-- [ ] Halaman 403: `resources/views/errors/403.blade.php`
+- [x] `routes/web.php`: public `/`, `/facilities`, `/facilities/{id}/availability`; group `['middleware'=>['auth','verified']]` → `/dashboard`, `profile`, group `middleware('role:user')` → resources `reservations`, `reports`
+- [x] `routes/admin.php`: group `['middleware'=>['auth','verified','role:admin']]` → `/admin/dashboard`, `/admin/facilities/*`, `/admin/users/*`, `/admin/reports/*`
+- [x] `routes/staff.php`: group `['middleware'=>['auth','verified','role:staff']]` → `/staff/dashboard`, `/staff/reservations/queue*`, `/staff/reports/queue*`
+- [x] Halaman 403: `resources/views/errors/403.blade.php`
 
 ## Acceptance Criteria
-- [ ] `GET /admin/dashboard` oleh user → 403
-- [ ] `GET /staff/dashboard` oleh admin → 403
-- [ ] Route public accessible tanpa login
-- [ ] Setelah login, user/admin/staff sampai dashboard masing-masing
+- [x] `GET /admin/dashboard` oleh user → 403
+- [x] `GET /staff/dashboard` oleh admin → 403
+- [x] Route public accessible tanpa login
+- [x] Setelah login, user/admin/staff sampai dashboard masing-masing
+
+## Testing Checklist
+- [x] Positive: user/admin/staff dapat mengakses dashboard sesuai role
+- [x] Negative: GET /admin/dashboard oleh user → 403; GET /staff/dashboard oleh admin → 403
+- [x] Public routes (`/`, `/facilities`) tetap bisa diakses tanpa login
 
 ## Completion State
 Otorisasi seluruh app kokoh; SRS-06 mulai halaman public.
