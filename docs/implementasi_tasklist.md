@@ -43,7 +43,7 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-01 | Fondasi Database & Struktur | [x] |
 | SRS-02 | Register (Registrasi Mandiri) | [x] |
 | SRS-03 | Login (Breeze + Verifikasi Admin) | [x] |
-| SRS-04 | Logout | [ ] |
+| SRS-04 | Logout | [x] |
 | SRS-05 | Akses & Role Middleware | [ ] |
 | SRS-06 | Daftar Fasilitas (Public) | [ ] |
 | SRS-07 | Cari & Filter Fasilitas (Public) | [ ] |
@@ -266,13 +266,17 @@ Breeze default: route `POST /logout` di `routes/auth.php`, controller `Authentic
 SRS-03.
 
 ## Implementation Steps
-- [ ] Verifikasi `destroy(Request $request)`: `Auth::guard('web')->logout()`, `$request->session()->invalidate()`, `$request->session()->regenerateToken()`, `return redirect('/')`
-- [ ] Pastikan `POST /logout` dalam group `['middleware' => ['auth']]`
-- [ ] Button logout di layout: `<form method="POST" action="/logout">` + `@csrf`
+- [x] Verifikasi `destroy(Request $request)`: `Auth::guard('web')->logout()`, `$request->session()->invalidate()`, `$request->session()->regenerateToken()`, `return redirect('/')`
+- [x] Pastikan `POST /logout` dalam group `['middleware' => ['auth']]`
+- [x] Button logout di layout: `<form method="POST" action="/logout">` + `@csrf`
 
 ## Acceptance Criteria
-- [ ] POST /logout → session hancur → redirect `/`
-- [ ] Akses halaman protected setelah logout → redirect `/login`
+- [x] POST /logout → session hancur → redirect `/`
+- [x] Akses halaman protected setelah logout → redirect `/login`
+
+## Testing Checklist
+- [x] Positive: POST /logout → session hancur → redirect /
+- [x] Negative: akses halaman protected setelah logout → redirect /login (SRS-05 middleware)
 
 ## Completion State
 Logout siap; SRS-05.
