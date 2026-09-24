@@ -180,7 +180,7 @@
                 },
                 validatePassword() {
                     this.errors.password = '';
-                    if (this.password.length < 8) this.errors.password = 'Kata sandi minimal 8 karakter';
+                    if (this.password.length < 1) this.errors.password = 'Kata sandi wajib diisi';
                 },
                 validateForm(e) {
                     this.validateEmail();

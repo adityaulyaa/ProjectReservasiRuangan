@@ -200,7 +200,7 @@
                 },
                 validateName() {
                     this.errors.name = '';
-                    if (this.name.length < 3) this.errors.name = 'Nama minimal 3 karakter';
+                    if (this.name.length < 1) this.errors.name = 'Nama lengkap wajib diisi';
                     else if (this.name.length > 255) this.errors.name = 'Nama maksimal 255 karakter';
                 },
                 validateEmail() {
