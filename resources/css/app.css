@@ -214,3 +214,18 @@
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(45, 212, 191, 0.5);
 }
+
+/* === Select Option Contrast Styling === */
+select option {
+    background-color: #ffffff !important;
+    color: #1f2937 !important;
+}
+
+select option:hover,
+select option:focus,
+select option:active,
+select option:checked {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+}
+

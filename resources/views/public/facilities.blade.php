@@ -41,12 +41,12 @@
                 <select 
                     id="location" 
                     name="location"
-                    class="w-full rounded-lg border border-amber-200/40 bg-white/10 px-4 py-2.5 text-white focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-300/20 transition appearance-none"
+                    class="w-full rounded-lg border border-amber-200/40 bg-white/10 px-4 py-2.5 text-white focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-300/20 transition appearance-none [&>option]:bg-white [&>option]:text-[#1f2937]"
                 >
-                    <option value="">Semua Lokasi</option>
-                    <option value="Gedung A" {{ request('location') === 'Gedung A' ? 'selected' : '' }}>Gedung A</option>
-                    <option value="Gedung B" {{ request('location') === 'Gedung B' ? 'selected' : '' }}>Gedung B</option>
-                    <option value="Gedung C" {{ request('location') === 'Gedung C' ? 'selected' : '' }}>Gedung C</option>
+                    <option value="" class="bg-white text-[#1f2937]">Semua Lokasi</option>
+                    <option value="Gedung A" class="bg-white text-[#1f2937]" {{ request('location') === 'Gedung A' ? 'selected' : '' }}>Gedung A</option>
+                    <option value="Gedung B" class="bg-white text-[#1f2937]" {{ request('location') === 'Gedung B' ? 'selected' : '' }}>Gedung B</option>
+                    <option value="Gedung C" class="bg-white text-[#1f2937]" {{ request('location') === 'Gedung C' ? 'selected' : '' }}>Gedung C</option>
                 </select>
             </div>
 
@@ -56,13 +56,13 @@
                 <select 
                     id="capacity" 
                     name="capacity"
-                    class="w-full rounded-lg border border-amber-200/40 bg-white/10 px-4 py-2.5 text-white focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-300/20 transition appearance-none"
+                    class="w-full rounded-lg border border-amber-200/40 bg-white/10 px-4 py-2.5 text-white focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-300/20 transition appearance-none [&>option]:bg-white [&>option]:text-[#1f2937]"
                 >
-                    <option value="">Semua Kapasitas</option>
-                    <option value="10" {{ request('capacity') === '10' ? 'selected' : '' }}>≥ 10 orang</option>
-                    <option value="25" {{ request('capacity') === '25' ? 'selected' : '' }}>≥ 25 orang</option>
-                    <option value="50" {{ request('capacity') === '50' ? 'selected' : '' }}>≥ 50 orang</option>
-                    <option value="100" {{ request('capacity') === '100' ? 'selected' : '' }}>≥ 100 orang</option>
+                    <option value="" class="bg-white text-[#1f2937]">Semua Kapasitas</option>
+                    <option value="10" class="bg-white text-[#1f2937]" {{ request('capacity') === '10' ? 'selected' : '' }}>≥ 10 orang</option>
+                    <option value="25" class="bg-white text-[#1f2937]" {{ request('capacity') === '25' ? 'selected' : '' }}>≥ 25 orang</option>
+                    <option value="50" class="bg-white text-[#1f2937]" {{ request('capacity') === '50' ? 'selected' : '' }}>≥ 50 orang</option>
+                    <option value="100" class="bg-white text-[#1f2937]" {{ request('capacity') === '100' ? 'selected' : '' }}>≥ 100 orang</option>
                 </select>
             </div>
 
