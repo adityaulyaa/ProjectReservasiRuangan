@@ -17,6 +17,7 @@ class Facility extends Model
         'location',
         'capacity',
         'description',
+        'image_url',
         'status',
     ];
 

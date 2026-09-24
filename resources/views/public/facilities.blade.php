@@ -79,38 +79,13 @@
     <!-- Facilities Grid -->
     <div class="relative z-10 mx-auto w-full max-w-7xl">
         @if($facilities->count() > 0)
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 @foreach($facilities as $index => $facility)
                     @php
-                        $cardIndex = ($index % 3) + 6;
+                        $cardIndex = ($index % 4) + 5;
                     @endphp
                     <x-public.facility-card :facility="$facility" :show-amenities="true" :stagger="$cardIndex" />
                 @endforeach
-            </div>
-
-            <!-- Pagination -->
-            <div class="mt-12 flex items-center justify-center gap-2 text-sm animate-fade-in-up stagger-8" style="animation-fill-mode: both;">
-                <span class="text-amber-100">Halaman</span>
-                
-                @if($facilities->onFirstPage())
-                    <span class="rounded-lg px-3 py-2 text-white/50">« Sebelumnya</span>
-                @else
-                    <a href="{{ $facilities->previousPageUrl() }}" class="rounded-lg border border-amber-200/60 px-3 py-2 text-amber-100 hover:bg-amber-200/10">« Sebelumnya</a>
-                @endif
-
-                @foreach($facilities->getUrlRange(1, $facilities->lastPage()) as $page => $url)
-                    @if($page == $facilities->currentPage())
-                        <span class="rounded-lg bg-teal-500 px-3 py-2 font-bold text-white">{{ $page }}</span>
-                    @else
-                        <a href="{{ $url }}" class="rounded-lg border border-amber-200/60 px-3 py-2 text-amber-100 hover:bg-amber-200/10">{{ $page }}</a>
-                    @endif
-                @endforeach
-
-                @if($facilities->hasMorePages())
-                    <a href="{{ $facilities->nextPageUrl() }}" class="rounded-lg border border-amber-200/60 px-3 py-2 text-amber-100 hover:bg-amber-200/10">Selanjutnya »</a>
-                @else
-                    <span class="rounded-lg px-3 py-2 text-white/50">Selanjutnya »</span>
-                @endif
             </div>
         @else
             <div class="text-center py-12 animate-fade-in-up stagger-6" style="animation-fill-mode: both;">

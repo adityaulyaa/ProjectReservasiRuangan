@@ -11,7 +11,10 @@ class PublicController extends Controller
     public function index(): View
     {
         $facilities = Facility::whereIn('status', ['active', 'maintenance'])
-            ->orderBy('name')
+            ->withCount(['reservations' => function ($query) {
+                $query->where('status', 'approved');
+            }])
+            ->orderBy('reservations_count', 'desc')
             ->take(6)
             ->get();
         $facilityStatuses = FacilityStatus::cases();
@@ -23,7 +26,7 @@ class PublicController extends Controller
     {
         $facilities = Facility::whereIn('status', ['active', 'maintenance'])
             ->orderBy('name')
-            ->paginate(9);
+            ->get();
         $facilityStatuses = FacilityStatus::cases();
 
         return view('public.facilities', compact('facilities', 'facilityStatuses'));

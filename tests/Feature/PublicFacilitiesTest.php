@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\Facility;
 use App\Enums\FacilityStatus;
+use App\Models\Facility;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -40,7 +40,7 @@ class PublicFacilitiesTest extends TestCase
         $response = $this->get('/facilities');
 
         $facilities = $response->viewData('facilities');
-        $this->assertCount(9, $facilities);
+        $this->assertCount(20, $facilities);
     }
 
     public function test_only_active_and_maintenance_facilities_shown(): void
@@ -106,7 +106,7 @@ class PublicFacilitiesTest extends TestCase
     private function createFacility(array $attributes = []): Facility
     {
         $defaults = [
-            'name' => 'Test Facility ' . uniqid(),
+            'name' => 'Test Facility '.uniqid(),
             'type' => 'Ruang Rapat',
             'location' => 'Gedung A',
             'capacity' => 10,
@@ -121,7 +121,7 @@ class PublicFacilitiesTest extends TestCase
     {
         for ($i = 0; $i < $count; $i++) {
             $this->createFacility(array_merge([
-                'name' => 'Facility ' . ($i + 1),
+                'name' => 'Facility '.($i + 1),
             ], $attributes));
         }
     }

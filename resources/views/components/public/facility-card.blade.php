@@ -18,7 +18,7 @@
     ];
 
     $statusValue = is_object($facility->status) ? $facility->status->value : $facility->status;
-    $image = Vite::asset('resources/images/register-bg.jpg');
+    $image = $facility->image_url ?? Vite::asset('resources/images/register-bg.jpg');
     $staggerClass = 'stagger-' . min(max((int)$stagger, 1), 8);
 @endphp
 
