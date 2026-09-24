@@ -8,7 +8,7 @@
 </head>
 <body class="font-sans antialiased overflow-x-hidden">
     <div class="relative min-h-screen lg:overflow-x-hidden flex flex-col">
-        <div class="absolute inset-0 animate-bg-zoom" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('{{ Vite::asset('resources/images/register-bg.jpg') }}'); background-size: cover; background-position: center;"></div>
+        <div class="fixed inset-0 z-0 animate-bg-zoom" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('{{ Vite::asset('resources/images/register-bg.jpg') }}'); background-size: cover; background-position: center; background-attachment: fixed;"></div>
 
         <div class="absolute inset-0 pointer-events-none">
             <div class="float-circle float-circle-1"></div>

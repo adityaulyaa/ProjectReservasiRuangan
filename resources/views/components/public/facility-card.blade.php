@@ -12,9 +12,9 @@
     ];
 
     $statusClasses = [
-        'active' => 'bg-teal-500/20 text-teal-200 border-teal-400/40',
-        'maintenance' => 'bg-yellow-500/20 text-yellow-200 border-yellow-400/40',
-        'inactive' => 'bg-gray-500/20 text-gray-200 border-gray-400/40',
+        'active' => 'bg-teal-600 text-white border-teal-600/40',
+        'maintenance' => 'bg-amber-600 text-white border-amber-400/40',
+        'inactive' => 'bg-red-600 text-white border-red-400/40',
     ];
 
     $statusValue = is_object($facility->status) ? $facility->status->value : $facility->status;
@@ -26,6 +26,10 @@
     <!-- Image Container -->
     <div class="relative overflow-hidden rounded-2xl">
         <img src="{{ $image }}" alt="{{ $facility->name }}" class="h-56 w-full object-cover transition duration-500 group-hover:scale-110">
+        <!-- Status Badge -->
+        <span class="absolute top-2 right-2 z-10 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border {{ $statusClasses[$statusValue] ?? 'bg-gray-600 text-white border-gray-600/40' }}">
+            {{ $statusLabels[$statusValue] ?? $statusValue }}
+        </span>
         <!-- Overlay gradient -->
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
     </div>
@@ -38,9 +42,15 @@
         <!-- Info -->
         <p class="mb-6 text-sm text-white/80">Kapasitas: {{ $facility->capacity }} orang</p>
 
-        <!-- Detail Button -->
+<!-- Detail Button -->
+    @auth
         <a href="{{ route('facilities.availability', $facility->id) }}" class="inline-flex items-center justify-center rounded-lg bg-teal-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-600 btn-lift">
             Detail
         </a>
+    @else
+        <button onclick="showLoginToast()" class="inline-flex items-center justify-center rounded-lg bg-teal-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-400 btn-lift">
+            Detail
+        </button>
+    @endauth
     </div>
 </div>
