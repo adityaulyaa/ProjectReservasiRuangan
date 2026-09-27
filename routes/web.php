@@ -18,8 +18,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::get('reservations/{reservation}', [ReservationController::class, 'show'])
+        ->whereNumber('reservation')
+        ->middleware('role:user,staff,admin')
+        ->name('reservations.show');
+
     Route::middleware('role:user')->group(function () {
-        Route::resource('reservations', ReservationController::class);
+        Route::resource('reservations', ReservationController::class)->except(['show']);
         Route::post('reservations/{id}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
 
         Route::resource('reports', ReportController::class);

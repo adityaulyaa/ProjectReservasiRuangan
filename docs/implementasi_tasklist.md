@@ -48,9 +48,9 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-06 | Daftar Fasilitas (Public) | [x] |
 | SRS-07 | Cari & Filter Fasilitas (Public) | [x] |
 | SRS-08 | Ketersediaan Fasilitas per Slot (Public) | [x] |
-| SRS-09 | Ajukan Reservasi (+ ReservationService) | [ ] |
-| SRS-10 | Riwayat & Detail Reservasi | [ ] |
-| SRS-11 | Batalkan Reservasi (User) | [ ] |
+| SRS-09 | Ajukan Reservasi (+ ReservationService) | [x] |
+| SRS-10 | Riwayat & Detail Reservasi | [x] |
+| SRS-11 | Batalkan Reservasi (User) | [x] |
 | SRS-12 | Lapor Kerusakan (Upload Foto) | [ ] |
 | SRS-13 | Status & Detail Laporan (User) | [ ] |
 | SRS-14 | Proses Antrian Reservasi (Staff) | [ ] |
@@ -447,25 +447,25 @@ SRS-01 (service skeleton), SRS-05, SRS-08.
 ## Implementation Steps
 
 ### Service — ReservationService (penuh)
-- [ ] `validateTimeSlot(string $start, string $end): array`:
+- [x] `validateTimeSlot(string $start, string $end): array`:
   - Format `H:i`. Cek `$start < $end`.
   - Dalam batas open–close (>=07:00, <=20:00).
   - Mulai/akhir kelipatan 30 menit (menit % 30 === 0).
-- [ ] `checkConflict($facilityId, $date, $start, $end, $excludeId=null): bool`:
+- [x] `checkConflict($facilityId, $date, $start, $end, $excludeId=null): bool`:
   - Query: `Reservation::where('facility_id',$facilityId)->where('reservation_date',$date)->where('status','approved')->where(function($q) use ($start,$end) { $q->where('start_time','<',$end)->where('end_time','>',$start); })->when($excludeId, fn($q)=>$q->where('id','!=',$excludeId))->exists()`
-- [ ] `checkAvailableFacility(Facility $facility): string|null` return error msg kalau status bukan active.
-- [ ] `createLog(Reservation $reservation, string $action, $old=null, $new=null, $note=null, $actorId=null): void` — simpan `reservation_logs`.
+- [x] `checkAvailableFacility(Facility $facility): string|null` return error msg kalau status bukan active.
+- [x] `createLog(Reservation $reservation, string $action, $old=null, $new=null, $note=null, $actorId=null): void` — simpan `reservation_logs`.
 
 ### Controller
-- [ ] `User\ReservationController@create`: load facilities active + slots → `view('user.reservations.create')`
-- [ ] `@store(StoreReservationRequest $request)` (Buat `app/Http/Requests/User/StoreReservationRequest.php`):
+- [x] `User\ReservationController@create`: load facilities active + slots → `view('user.reservations.create')`
+- [x] `@store(StoreReservationRequest $request)` (Buat `app/Http/Requests/User/StoreReservationRequest.php`):
   - Rules: `facility_id` required|exists:facilities,id; `reservation_date` required|date|after_or_equal:today; `start_time` required|date_format:H:i; `end_time` required|date_format:H:i|after:start_time; `purpose` required|string|max:500
   - Server validation via `withValidator` yang memanggil: `validateTimeSlot`, `checkConflict`, `checkAvailableFacility`
   - Jika valid → `Reservation::create([... 'status'=>ReservationStatus::PENDING->value])`; `createLog($res, 'created', null, 'pending', 'Pengajuan reservasi', auth()->id())`
   - Redirect route('reservations.index') flash success
 
 ### Client-side Validation
-- [ ] View `create.blade.php` (Alpine): dropdown active, date input min today, time inputs (start/end), tujuan textarea. Disable submit bila start>=end atau slot tidak valid. Tampilkan preview validation.
+- [x] View `create.blade.php` (Alpine): dropdown active, date input min today, time inputs (start/end), tujuan textarea. Disable submit bila start>=end atau slot tidak valid. Tampilkan preview validation.
 
 ## Business Rules
 - User hanya dapat reservasi utk dirinya sendiri. Status awal `pending`. Fasilitas maintenance/inactive tidak bisa dipesan. Bentrok (approved) ditolak. Slot di luar jam/kelipatan 30 ditolak. Date before today ditolak.
@@ -475,10 +475,10 @@ SRS-01 (service skeleton), SRS-05, SRS-08.
 - Client: matching + disable.
 
 ## Acceptance Criteria
-- [ ] Reservasi valid → status pending + log created
-- [ ] Bentrok approved → error
-- [ ] Maintenance → error
-- [ ] Jam/slot salah → error server
+- [x] Reservasi valid → status pending + log created
+- [x] Bentrok approved → error
+- [x] Maintenance → error
+- [x] Jam/slot salah → error server
 
 ## Completion State
 User bisa ajukan reservasi; SRS-10 (history/detail) & SRS-11 (cancel).
@@ -496,17 +496,17 @@ SRS-09, SRS-01.
 ## Implementation Steps
 
 ### Controller
-- [ ] `User\ReservationController@index`: `auth()->user()->reservations()->with('facility')->latest()->paginate(10)` → `view('user.reservations.index')`
-- [ ] `@show(Reservation $reservation)`: abort_unless(owner OR staff/admin, 403); view dengan `logs` (`$reservation->logs()->with('actor')->latest()`) + facility.
+- [x] `User\ReservationController@index`: `auth()->user()->reservations()->with('facility')->latest()->paginate(10)` → `view('user.reservations.index')`
+- [x] `@show(Reservation $reservation)`: abort_unless(owner OR staff/admin, 403); view dengan `logs` (`$reservation->logs()->with('actor')->latest()`) + facility.
 
 ### View
-- [ ] `index.blade.php`: tabel ID, fasilitas, tanggal, jam, status (badge warna `ReservationStatus::label/color`), aksi Lihat / (Batal bila status=pending/approved & dalam batas cancel).
-- [ ] `show.blade.php`: detail lengkap (fasilitas, tanggal, jam, tujuan, status, alasan) + timeline `logs`.
+- [x] `index.blade.php`: tabel ID, fasilitas, tanggal, jam, status (badge warna `ReservationStatus::label/color`), aksi Lihat / (Batal bila status=pending/approved & dalam batas cancel).
+- [x] `show.blade.php`: detail lengkap (fasilitas, tanggal, jam, tujuan, status, alasan) + timeline `logs`.
 
 ## Acceptance Criteria
-- [ ] /reservations menampilkan riwayat
-- [ ] /reservations/{id} menampilkan detail + log
-- [ ] User lain tidak bisa lihat (403)
+- [x] /reservations menampilkan riwayat
+- [x] /reservations/{id} menampilkan detail + log
+- [x] User lain tidak bisa lihat (403)
 
 ## Completion State
 Riwayat siap; SRS-11 cancel.
@@ -524,7 +524,7 @@ SRS-10, SRS-01 (config, log).
 ## Implementation Steps
 
 ### Controller
-- [ ] `User\ReservationController@cancel(Reservation $reservation)` (POST):
+- [x] `User\ReservationController@cancel(Reservation $reservation)` (POST):
   - Authority: `abort_unless($reservation->user_id === auth()->id(), 403)`
   - Status valid: `pending` | `approved`
   - Deadline: `now()->diffInMinutes($reservation->reservation_date.' '.$reservation->start_time) >= config('reservation.cancel_hours_before')*60`
@@ -536,9 +536,9 @@ SRS-10, SRS-01 (config, log).
 - Hanya pemilik. Hanya pending/approved. Batas waktu cancel. `cancel_reason` wajib. Log tercatat.
 
 ## Acceptance Criteria
-- [ ] User batal → status cancelled + reason & log
-- [ ] Status approved+yang lewat batas ditolak
-- [ ] Status rejected/cancelled tidak bisa batal
+- [x] User batal → status cancelled + reason & log
+- [x] Status approved+yang lewat batas ditolak
+- [x] Status rejected/cancelled tidak bisa batal
 
 ## Completion State
 Cancel user siap; lanjut SRS-12 report.
