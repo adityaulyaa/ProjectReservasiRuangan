@@ -1,275 +1,298 @@
 @extends('layouts.public')
 
+@section('lightTheme', 'true')
+
 @section('title', 'Ketersediaan ' . $facility->name . ' - AksesRuang')
 
 @section('content')
-<div class="relative min-h-screen flex flex-col px-4 py-10 sm:px-6 lg:px-8">
-    <div class="relative z-10 mx-auto w-full max-w-6xl">
-        <!-- Back Link -->
-        <div class="mb-6 animate-fade-in-up stagger-1" style="animation-fill-mode: both;">
-            <a href="{{ route('facilities.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-amber-100/80 hover:text-teal-300 transition">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                Kembali ke Daftar Fasilitas
-            </a>
-        </div>
-
-        <!-- Facility Info Card -->
-        <div class="mb-8 overflow-hidden rounded-3xl border border-amber-200/40 bg-black/60 shadow-2xl backdrop-blur-md animate-fade-in-up stagger-2" style="animation-fill-mode: both;">
-            <div class="grid grid-cols-1 md:grid-cols-3">
-                <!-- Facility Image -->
-                <div class="relative h-64 md:h-auto overflow-hidden bg-slate-950">
-                    <img 
-                        src="{{ $facility->image_url ?? Vite::asset('resources/images/register-bg.jpg') }}" 
-                        alt="{{ $facility->name }}"
-                        class="h-full w-full object-cover"
-                    >
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent md:hidden"></div>
-                </div>
-
-                <!-- Facility Details -->
-                <div class="col-span-2 flex flex-col justify-between p-6 sm:p-8">
-                    <div>
-                        <!-- Badges -->
-                        <div class="mb-3 flex flex-wrap items-center gap-2">
-                            @if(!empty($facility->type))
-                                <span class="rounded-md border border-white/20 bg-white/10 px-2.5 py-1 text-xs font-semibold text-amber-100">
-                                    {{ $facility->type }}
-                                </span>
-                            @endif
-
-                            @if($isMaintenance)
-                                <span class="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/20 px-3 py-1 text-xs font-semibold text-amber-200">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-                                    Dalam Perbaikan
-                                </span>
-                            @else
-                                <span class="inline-flex items-center gap-1.5 rounded-full border border-teal-400/40 bg-teal-500/20 px-3 py-1 text-xs font-semibold text-teal-200">
-                                    <span class="h-1.5 w-1.5 rounded-full bg-teal-400"></span>
-                                    Aktif &amp; Tersedia
-                                </span>
-                            @endif
-                        </div>
-
-                        <!-- Name -->
-                        <h1 class="mb-3 text-2xl font-black text-white sm:text-3xl">
-                            {{ $facility->name }}
-                        </h1>
-
-                        <!-- Location & Capacity -->
-                        <div class="mb-4 flex flex-wrap items-center gap-4 text-xs sm:text-sm text-white/80">
-                            @if(!empty($facility->location))
-                                <div class="flex items-center gap-1.5">
-                                    <svg class="h-4 w-4 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    <span>{{ $facility->location }}</span>
-                                </div>
-                            @endif
-
-                            <div class="flex items-center gap-1.5">
-                                <svg class="h-4 w-4 text-teal-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                <span>Kapasitas: <strong class="text-white">{{ $facility->capacity }}</strong> orang</span>
-                            </div>
-                        </div>
-
-                        <!-- Description -->
-                        @if(!empty($facility->description))
-                            <p class="text-xs sm:text-sm text-white/70 leading-relaxed">
-                                {{ $facility->description }}
-                            </p>
-                        @endif
-                    </div>
-                </div>
+<div 
+    class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
+    x-data="{
+        selectedSlots: {{ json_encode(
+            !$isMaintenance && collect($slotStatuses)->whereIn('start', ['09:00', '09:30'])->where('is_occupied', false)->count() === 2
+                ? ['09:00', '09:30']
+                : collect($slotStatuses)->where('is_occupied', false)->take(1)->pluck('start')->values()->all()
+        ) }},
+        toggleSlot(slotStart) {
+            if (this.selectedSlots.includes(slotStart)) {
+                this.selectedSlots = this.selectedSlots.filter(s => s !== slotStart);
+            } else {
+                this.selectedSlots.push(slotStart);
+                this.selectedSlots.sort();
+            }
+        },
+        isSelected(slotStart) {
+            return this.selectedSlots.includes(slotStart);
+        },
+        get timeDisplay() {
+            if (this.selectedSlots.length === 0) return '-';
+            return [...this.selectedSlots].sort().join(', ');
+        },
+        get durationDisplay() {
+            if (this.selectedSlots.length === 0) return '-';
+            return (this.selectedSlots.length * 30) + ' menit';
+        },
+        get reservationUrl() {
+            if (this.selectedSlots.length === 0) return '#';
+            const slotsParam = encodeURIComponent(this.selectedSlots.sort().join(','));
+            return '{{ route('reservations.create') }}?facility_id={{ $facility->id }}&date={{ $date }}&slots=' + slotsParam;
+        }
+    }"
+>
+    <!-- Top Facility Showcase Card -->
+    <div class="mb-8 rounded-3xl bg-white p-6 sm:p-8 border border-gray-100 shadow-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <!-- Facility Image -->
+            <div class="lg:col-span-6 overflow-hidden rounded-2xl bg-gray-100">
+                <img 
+                    src="{{ $facility->image_url ?? Vite::asset('resources/images/register-bg.jpg') }}" 
+                    alt="{{ $facility->name }}"
+                    class="w-full h-64 sm:h-80 md:h-[340px] object-cover rounded-2xl"
+                >
             </div>
-        </div>
 
-        <!-- Maintenance Warning Banner -->
-        @if($isMaintenance)
-            <div class="mb-8 flex items-start gap-4 rounded-2xl border border-amber-400/50 bg-amber-500/10 p-5 backdrop-blur-md animate-fade-in-up stagger-3" style="animation-fill-mode: both;">
-                <div class="rounded-lg bg-amber-500/20 p-2 text-amber-300">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-base font-bold text-amber-200">Fasilitas Sedang Dalam Perbaikan</h3>
-                    <p class="text-xs sm:text-sm text-white/80 mt-1">
-                        Fasilitas ini sedang dalam masa pemeliharaan teknis. Seluruh slot reservasi dinonaktifkan sementara dan belum dapat dipesan hingga perbaikan selesai.
-                    </p>
-                </div>
-            </div>
-        @endif
+            <!-- Facility Details -->
+            <div class="lg:col-span-6 flex flex-col justify-center">
+                <!-- Badges -->
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-medium">
+                        {{ $facility->type ?? 'Ruang Kolaborasi' }}
+                    </span>
 
-        <!-- Date Selector & Summary Bar -->
-        <div class="mb-8 rounded-2xl border border-amber-200/40 bg-black/60 p-6 backdrop-blur-md animate-fade-in-up stagger-3" style="animation-fill-mode: both;">
-            <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                <!-- Date Filter Form -->
-                <form method="GET" action="{{ route('facilities.availability', $facility->id) }}" class="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <label for="date" class="text-xs font-semibold text-amber-100 whitespace-nowrap">
-                        Pilih Tanggal:
-                    </label>
-                    <div class="relative">
-                        <input 
-                            type="date" 
-                            id="date" 
-                            name="date" 
-                            value="{{ $date }}"
-                            class="rounded-lg border border-amber-200/40 bg-slate-950/80 px-4 py-2 text-sm text-white focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/20 transition cursor-pointer"
-                        >
-                    </div>
-                    <button 
-                        type="submit" 
-                        class="rounded-lg bg-teal-500 px-5 py-2 text-xs sm:text-sm font-bold text-white transition hover:bg-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/40 btn-lift"
-                    >
-                        Lihat Jadwal
-                    </button>
-
-                    <!-- Quick Shortcuts -->
-                    <div class="flex items-center gap-1.5 pt-2 sm:pt-0">
-                        <a 
-                            href="{{ route('facilities.availability', ['id' => $facility->id, 'date' => now()->toDateString()]) }}" 
-                            class="rounded-md border border-white/20 bg-white/5 px-2.5 py-1 text-xs text-white/80 hover:bg-white/10 hover:text-white transition {{ $date === now()->toDateString() ? 'border-teal-400 text-teal-300' : '' }}"
-                        >
-                            Hari Ini
-                        </a>
-                        <a 
-                            href="{{ route('facilities.availability', ['id' => $facility->id, 'date' => now()->addDay()->toDateString()]) }}" 
-                            class="rounded-md border border-white/20 bg-white/5 px-2.5 py-1 text-xs text-white/80 hover:bg-white/10 hover:text-white transition {{ $date === now()->addDay()->toDateString() ? 'border-teal-400 text-teal-300' : '' }}"
-                        >
-                            Besok
-                        </a>
-                    </div>
-                </form>
-
-                <!-- Legend & Status Indicators -->
-                <div class="flex flex-wrap items-center gap-4 text-xs font-medium border-t border-white/10 pt-4 lg:border-t-0 lg:pt-0">
-                    <div class="flex items-center gap-1.5">
-                        <span class="h-3 w-3 rounded-md bg-teal-500/80 border border-teal-300/40"></span>
-                        <span class="text-white/80">Tersedia ({{ $availableCount }})</span>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="h-3 w-3 rounded-md bg-red-500/80 border border-red-300/40"></span>
-                        <span class="text-white/80">Terbooking ({{ $bookedCount }})</span>
-                    </div>
                     @if($isMaintenance)
-                        <div class="flex items-center gap-1.5">
-                            <span class="h-3 w-3 rounded-md bg-amber-500/80 border border-amber-300/40"></span>
-                            <span class="text-amber-200">Dalam Perbaikan</span>
-                        </div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-medium border border-amber-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            Dalam Perbaikan
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF5EF] text-[#1E4D40] text-xs font-medium">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#1E4D40]"></span>
+                            Tersedia
+                        </span>
                     @endif
                 </div>
-            </div>
 
-            <!-- Date Label Info -->
-            <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-amber-100/90">
-                <span>
-                    Jadwal Operasional: <strong>07.00 – 20.00 WIB</strong> (Slot 30 Menit)
-                </span>
-                <span class="text-white/60">
-                    Tanggal terpilih: <strong class="text-amber-100">{{ \Illuminate\Support\Carbon::parse($date)->translatedFormat('l, d F Y') }}</strong>
-                </span>
+                <!-- Facility Title -->
+                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight">
+                    {{ $facility->name }}
+                </h1>
+
+                <!-- Facility Description -->
+                <p class="mt-3 text-sm text-gray-600 leading-relaxed">
+                    {{ $facility->description ?? 'Ruang modern yang dirancang untuk fokus, kolaborasi, dan pertemuan produktif. Dilengkapi layar presentasi, Wi-Fi, dan pendingin ruangan.' }}
+                </p>
+
+                <!-- Facility Metadata Row -->
+                <div class="mt-6 flex flex-wrap items-center gap-6 text-xs sm:text-sm text-gray-600">
+                    <!-- Location -->
+                    <div class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-[#1E4D40]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>{{ $facility->location ?? 'Gedung Kreatif' }}</span>
+                    </div>
+
+                    <!-- Capacity -->
+                    <div class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-[#1E4D40]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Hingga {{ $facility->capacity }} orang</span>
+                    </div>
+
+                    <!-- Operational Hours -->
+                    <div class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-[#1E4D40]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>07.00 - 20.00</span>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <!-- Time Slot Grid (SRS-08 Requirement) -->
-        <div class="mb-10 animate-fade-in-up stagger-4" style="animation-fill-mode: both;">
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 gap-3">
+    <!-- Maintenance Notice Alert -->
+    @if($isMaintenance)
+        <div class="mb-8 flex items-start gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+            <div class="rounded-lg bg-amber-100 p-2 text-amber-700">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-amber-800">Fasilitas Sedang Dalam Perbaikan</h3>
+                <p class="text-xs sm:text-sm text-amber-700 mt-1">
+                    Fasilitas ini sedang dalam masa pemeliharaan teknis. Seluruh slot reservasi dinonaktifkan sementara dan belum dapat dipesan hingga perbaikan selesai.
+                </p>
+            </div>
+        </div>
+    @endif
+
+    <!-- Bottom Section: Slot Picker & Summary Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left: Slot Picker Card -->
+        <div class="lg:col-span-8 rounded-3xl bg-white p-6 sm:p-8 border border-gray-100 shadow-sm">
+            <!-- Header Row -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900">
+                        Pilih waktu reservasi
+                    </h2>
+                    <p class="text-xs sm:text-sm text-gray-400 mt-1">
+                        {{ \Illuminate\Support\Carbon::parse($date)->locale('id')->translatedFormat('l, d F Y') }} · Durasi per slot 30 menit
+                    </p>
+                </div>
+
+                <!-- Date Picker Input -->
+                <div class="relative flex items-center">
+                    <input 
+                        type="date" 
+                        id="datePicker" 
+                        name="date" 
+                        value="{{ $date }}"
+                        onchange="window.location.href = '{{ route('facilities.availability', $facility->id) }}?date=' + this.value"
+                        class="rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs sm:text-sm font-medium text-gray-700 shadow-xs hover:border-gray-300 focus:border-[#1E4D40] focus:outline-none focus:ring-1 focus:ring-[#1E4D40] cursor-pointer"
+                    >
+                </div>
+            </div>
+
+            <!-- Legend Row -->
+            <div class="mt-6 mb-6 flex flex-wrap items-center gap-5 text-xs text-gray-500 border-t border-gray-100 pt-4">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>
+                    <span>Tersedia</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#1E4D40]"></span>
+                    <span>Dipilih</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
+                    <span>Terisi</span>
+                </div>
+            </div>
+
+            <!-- Slot Grid (26 slots) -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
                 @foreach($slotStatuses as $slot)
-                    @php
-                        if ($isMaintenance) {
-                            $slotBg = 'border-amber-400/30 bg-amber-500/10 text-amber-200/80';
-                            $badgeColor = 'text-amber-300 bg-amber-400/10 border-amber-400/30';
-                            $statusText = 'Perbaikan';
-                        } elseif ($slot['is_occupied']) {
-                            $slotBg = 'border-red-500/30 bg-red-950/40 text-red-200';
-                            $badgeColor = 'text-red-300 bg-red-500/20 border-red-400/30';
-                            $statusText = 'Terbooking';
-                        } else {
-                            $slotBg = 'border-teal-400/30 bg-teal-950/30 text-teal-100 hover:border-teal-300 hover:bg-teal-900/40';
-                            $badgeColor = 'text-teal-300 bg-teal-500/20 border-teal-400/30';
-                            $statusText = 'Tersedia';
-                        }
-                    @endphp
-
-                    <div class="flex flex-col justify-between rounded-xl border p-3.5 backdrop-blur-sm transition {{ $slotBg }}">
-                        <!-- Time Range -->
-                        <div class="text-xs font-bold text-white mb-2">
-                            {{ $slot['start'] }} – {{ $slot['end'] }}
+                    @if($isMaintenance)
+                        <div class="rounded-xl border border-amber-100 bg-amber-50/60 p-3 text-center cursor-not-allowed">
+                            <div class="text-sm font-bold text-amber-800">{{ $slot['start'] }}</div>
+                            <div class="text-[11px] font-medium text-amber-600 mt-1">Perbaikan</div>
                         </div>
-
-                        <!-- Status Label (Tanpa detail pemohon/tujuan - Privasi WCAG & SRS) -->
-                        <div class="mt-auto">
-                            <span class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold {{ $badgeColor }}">
-                                @if(!$isMaintenance && !$slot['is_occupied'])
-                                    <span class="h-1.5 w-1.5 rounded-full bg-teal-400"></span>
-                                @elseif($slot['is_occupied'])
-                                    <span class="h-1.5 w-1.5 rounded-full bg-red-400"></span>
-                                @else
-                                    <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
-                                @endif
-                                {{ $statusText }}
-                            </span>
+                    @elseif($slot['is_occupied'])
+                        <div class="rounded-xl border border-gray-100 bg-gray-100/90 p-3 text-center cursor-not-allowed">
+                            <div class="text-sm font-bold text-gray-400">{{ $slot['start'] }}</div>
+                            <div class="text-[11px] font-medium text-gray-400 mt-1">
+                                Terisi <span class="sr-only">Terbooking</span>
+                            </div>
                         </div>
-                    </div>
+                    @else
+                        <button 
+                            type="button"
+                            @click="toggleSlot('{{ $slot['start'] }}')"
+                            class="rounded-xl p-3 text-center transition cursor-pointer w-full focus:outline-none"
+                            :class="isSelected('{{ $slot['start'] }}') 
+                                ? 'bg-[#1E4D40] border border-[#1E4D40] text-white shadow-xs' 
+                                : 'bg-white border border-gray-200 text-gray-800 hover:border-[#1E4D40] hover:shadow-xs'"
+                        >
+                            <div 
+                                class="text-sm font-bold"
+                                :class="isSelected('{{ $slot['start'] }}') ? 'text-white' : 'text-gray-800'"
+                            >
+                                {{ $slot['start'] }}
+                            </div>
+                            <div 
+                                class="text-[11px] font-medium mt-1"
+                                :class="isSelected('{{ $slot['start'] }}') ? 'text-white/80' : 'text-gray-400'"
+                                x-text="isSelected('{{ $slot['start'] }}') ? 'Dipilih' : 'Tersedia'"
+                            >
+                                Tersedia
+                            </div>
+                        </button>
+                    @endif
                 @endforeach
             </div>
         </div>
 
-        <!-- Reservation CTA Box -->
-        <div class="rounded-3xl border border-amber-200/40 bg-black/60 p-6 sm:p-8 text-center backdrop-blur-md animate-fade-in-up stagger-5" style="animation-fill-mode: both;">
-            @if($isMaintenance)
-                <h3 class="text-lg font-bold text-amber-200 mb-2">Fasilitas Tidak Dapat Dipesan</h3>
-                <p class="text-xs sm:text-sm text-white/70 max-w-xl mx-auto mb-4">
-                    Mohon maaf, saat ini fasilitas sedang dalam proses pemeliharaan. Silakan cek fasilitas lain yang tersedia atau hubungi petugas.
-                </p>
-                <a href="{{ route('facilities.index') }}" class="inline-flex items-center justify-center rounded-lg border border-amber-200/60 px-6 py-2.5 text-xs sm:text-sm font-semibold text-amber-100 hover:bg-white/10 transition">
-                    Cari Fasilitas Lain
-                </a>
-            @else
-                <h3 class="text-lg sm:text-xl font-bold text-white mb-2">Ingin Menggunakan Fasilitas Ini?</h3>
-                <p class="text-xs sm:text-sm text-white/70 max-w-xl mx-auto mb-6">
-                    Lihat slot waktu yang masih tersedia di atas, lalu ajukan reservasi untuk keperluan studi, rapat, atau kegiatan Anda.
-                </p>
+        <!-- Right: Summary Sidebar Card -->
+        <div class="lg:col-span-4 rounded-3xl bg-white p-6 sm:p-7 border border-gray-100 shadow-sm sticky top-6">
+            <!-- Header -->
+            <div class="text-[11px] font-bold text-[#1E4D40] tracking-wider uppercase">
+                RINGKASAN RESERVASI
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mt-1 mb-6">
+                {{ $facility->name }}
+            </h3>
 
+            <!-- Details List -->
+            <div class="space-y-4 text-xs sm:text-sm">
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-400 font-medium">Tanggal</span>
+                    <span class="font-semibold text-gray-900">
+                        {{ \Illuminate\Support\Carbon::parse($date)->locale('id')->translatedFormat('d M Y') }}
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                    <span class="text-gray-400 font-medium">Waktu</span>
+                    <span class="font-semibold text-gray-900" x-text="timeDisplay">
+                        -
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-between py-2">
+                    <span class="text-gray-400 font-medium">Durasi</span>
+                    <span class="font-semibold text-gray-900" x-text="durationDisplay">
+                        -
+                    </span>
+                </div>
+            </div>
+
+            <!-- Cancellation Policy Notice -->
+            <div class="my-6 flex items-start gap-2.5 rounded-xl bg-[#EAF5EF] p-4 text-xs text-[#1E4D40] font-medium leading-relaxed">
+                <svg class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Reservasi dapat dibatalkan hingga 2 jam sebelum jadwal.</span>
+            </div>
+
+            <!-- Action Button -->
+            @if($isMaintenance)
+                <button 
+                    disabled 
+                    class="w-full py-3.5 px-4 rounded-xl bg-gray-200 text-gray-400 text-sm font-semibold cursor-not-allowed"
+                >
+                    Fasilitas Tidak Dapat Dipesan
+                </button>
+            @else
                 @auth
                     @if(auth()->user()->role === 'user')
                         <a 
-                            href="{{ route('reservations.create', ['facility_id' => $facility->id, 'date' => $date]) }}" 
-                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-500 px-8 py-3 text-sm font-bold text-white transition hover:bg-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/50 btn-lift shadow-lg shadow-teal-500/20"
+                            :href="reservationUrl"
+                            class="w-full block py-3.5 px-4 rounded-xl bg-[#1E4D40] hover:bg-[#163c32] text-white text-sm font-semibold transition text-center shadow-xs cursor-pointer"
+                            :class="{ 'opacity-50 pointer-events-none': selectedSlots.length === 0 }"
                         >
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            Ajukan Reservasi Sekarang
+                            Lanjutkan reservasi
                         </a>
                     @else
                         <a 
                             href="{{ route('dashboard') }}" 
-                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-500 px-8 py-3 text-sm font-bold text-white transition hover:bg-teal-400 btn-lift"
+                            class="w-full block py-3.5 px-4 rounded-xl bg-[#1E4D40] hover:bg-[#163c32] text-white text-sm font-semibold transition text-center shadow-xs"
                         >
                             Buka Dashboard {{ ucfirst(auth()->user()->role) }}
                         </a>
                     @endif
                 @else
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
-                        <a 
-                            href="{{ route('login') }}" 
-                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg bg-teal-500 px-8 py-3 text-sm font-bold text-white transition hover:bg-teal-400 btn-lift shadow-lg shadow-teal-500/20"
-                        >
-                            Masuk untuk Mengajukan Reservasi
-                        </a>
-                        <a 
-                            href="{{ route('register') }}" 
-                            class="w-full sm:w-auto inline-flex items-center justify-center rounded-lg border border-amber-200/60 px-6 py-3 text-sm font-semibold text-amber-100 hover:bg-white/10 transition"
-                        >
-                            Daftar Akun Baru
-                        </a>
-                    </div>
+                    <button 
+                        type="button"
+                        onclick="window.showLoginToast()"
+                        class="w-full block py-3.5 px-4 rounded-xl bg-[#1E4D40] hover:bg-[#163c32] text-white text-sm font-semibold transition text-center shadow-xs cursor-pointer"
+                    >
+                        Lanjutkan reservasi
+                    </button>
                 @endauth
             @endif
         </div>
