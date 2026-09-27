@@ -381,17 +381,13 @@ SRS-06.
 ## Implementation Steps
 
 ### Backend
-- [ ] `PublicController::facilities()` extend query:
-  - Terima query params `type`, `location`, `capacity_min` (nullable)
-  - `Facility::when($type, fn($q)=>$q->where('type',$type))
-    ->when($location, fn($q)=>$q->where('location','like','%'.$location.'%'))
-    ->when($capacity_min, fn($q)=>$q->where('capacity','>=',$capacity_min))
-    ->whereIn('status',['active','maintenance'])
-    ->orderBy('name')->paginate(9)->withQueryString()`
+- [x] `PublicController::facilities()` extend query:
+  - Terima query params `type`, `location`, `capacity_min`, `search` (nullable)
+  - `Facility::when($search, ...)->when($type, ...)->when($location, ...)->when($capacity_min, ...)->whereIn('status',['active','maintenance'])->orderBy('name')`
   - Ambil list unik type & location utk dropdown
 
 ### View
-- [ ] Fish form di atas list: Dropdown Tipe, Text Lokasi, Number Kapasitas min, tombol [Cari] & [Reset]. Filter via GET query string. Tandai hasil "Menampilkan X fasilitas".
+- [x] Form filter di atas list: Dropdown Tipe dinamis, Dropdown Lokasi dinamis, Dropdown Kapasitas min, Input Nama Fasilitas, tombol [Cari] & [Reset]. Filter via GET query string. Tandai hasil "Menampilkan X fasilitas".
 
 ## Validation Rules
 - capacity_min numeric >= 0. type & location max 100.

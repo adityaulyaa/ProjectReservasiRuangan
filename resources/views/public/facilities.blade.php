@@ -15,11 +15,11 @@
     </div>
 
     <!-- Search & Filter Bar -->
-    <div class="relative z-10 mx-auto w-full max-w-7xl mb-12 animate-fade-in-up stagger-3" style="animation-fill-mode: both;">
-        <form method="GET" action="{{ route('facilities.index') }}" class="flex flex-col gap-3 rounded-2xl border border-amber-200/60 bg-black/30 p-6 backdrop-blur-md sm:flex-row sm:items-end sm:gap-3">
+    <div class="relative z-10 mx-auto w-full max-w-7xl mb-8 animate-fade-in-up stagger-3" style="animation-fill-mode: both;">
+        <form method="GET" action="{{ route('facilities.index') }}" class="grid grid-cols-1 gap-4 rounded-2xl border border-amber-200/40 bg-black/50 p-6 backdrop-blur-md sm:grid-cols-2 lg:grid-cols-5 sm:items-end">
             <!-- Search Input -->
-            <div class="flex-1">
-                <label for="search" class="block text-xs font-semibold text-amber-100 mb-1">Cari nama fasilitas</label>
+            <div>
+                <label for="search" class="block text-xs font-semibold text-amber-100 mb-1.5">Nama Fasilitas</label>
                 <div class="relative">
                     <input 
                         type="text" 
@@ -27,53 +27,93 @@
                         name="search" 
                         placeholder="Cari nama fasilitas..." 
                         value="{{ request('search') }}"
-                        class="w-full rounded-lg border border-amber-200/40 bg-white/10 px-4 py-2.5 text-white placeholder-white/50 focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-300/20 transition"
+                        class="w-full rounded-lg border border-amber-200/40 bg-slate-950/70 pl-3 pr-9 py-2.5 text-sm text-white placeholder-white/50 focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/20 transition"
                     >
-                    <svg class="absolute right-3 top-2.5 h-5 w-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                        <svg class="h-4 w-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
                 </div>
             </div>
 
+            <!-- Type Dropdown -->
+            <div>
+                <label for="type" class="block text-xs font-semibold text-amber-100 mb-1.5">Tipe Fasilitas</label>
+                <select 
+                    id="type" 
+                    name="type"
+                    class="w-full rounded-lg border border-amber-200/40 bg-slate-950/70 px-3 py-2.5 text-sm text-white focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/20 transition [&>option]:bg-slate-900 [&>option]:text-white cursor-pointer"
+                >
+                    <option value="">Semua Tipe</option>
+                    @if(isset($types))
+                        @foreach($types as $t)
+                            <option value="{{ $t }}" {{ request('type') === $t ? 'selected' : '' }}>{{ $t }}</option>
+                        @endforeach
+                    @endif
+                </select>
+            </div>
+
             <!-- Location Dropdown -->
-            <div class="flex-1">
-                <label for="location" class="block text-xs font-semibold text-amber-100 mb-1">Lokasi / Gedung</label>
+            <div>
+                <label for="location" class="block text-xs font-semibold text-amber-100 mb-1.5">Lokasi / Gedung</label>
                 <select 
                     id="location" 
                     name="location"
-                    class="w-full rounded-lg border border-amber-200/40 bg-white/10 px-4 py-2.5 text-white focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-300/20 transition appearance-none [&>option]:bg-white [&>option]:text-[#1f2937]"
+                    class="w-full rounded-lg border border-amber-200/40 bg-slate-950/70 px-3 py-2.5 text-sm text-white focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/20 transition [&>option]:bg-slate-900 [&>option]:text-white cursor-pointer"
                 >
-                    <option value="" class="bg-white text-[#1f2937]">Semua Lokasi</option>
-                    <option value="Gedung A" class="bg-white text-[#1f2937]" {{ request('location') === 'Gedung A' ? 'selected' : '' }}>Gedung A</option>
-                    <option value="Gedung B" class="bg-white text-[#1f2937]" {{ request('location') === 'Gedung B' ? 'selected' : '' }}>Gedung B</option>
-                    <option value="Gedung C" class="bg-white text-[#1f2937]" {{ request('location') === 'Gedung C' ? 'selected' : '' }}>Gedung C</option>
+                    <option value="">Semua Lokasi</option>
+                    @if(isset($locations))
+                        @foreach($locations as $loc)
+                            <option value="{{ $loc }}" {{ request('location') === $loc ? 'selected' : '' }}>{{ $loc }}</option>
+                        @endforeach
+                    @endif
                 </select>
             </div>
 
-            <!-- Capacity Dropdown -->
-            <div class="flex-1">
-                <label for="capacity" class="block text-xs font-semibold text-amber-100 mb-1">Kapasitas</label>
+            <!-- Capacity Min Dropdown -->
+            <div>
+                <label for="capacity_min" class="block text-xs font-semibold text-amber-100 mb-1.5">Kapasitas Minimal</label>
                 <select 
-                    id="capacity" 
-                    name="capacity"
-                    class="w-full rounded-lg border border-amber-200/40 bg-white/10 px-4 py-2.5 text-white focus:border-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-300/20 transition appearance-none [&>option]:bg-white [&>option]:text-[#1f2937]"
+                    id="capacity_min" 
+                    name="capacity_min"
+                    class="w-full rounded-lg border border-amber-200/40 bg-slate-950/70 px-3 py-2.5 text-sm text-white focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/20 transition [&>option]:bg-slate-900 [&>option]:text-white cursor-pointer"
                 >
-                    <option value="" class="bg-white text-[#1f2937]">Semua Kapasitas</option>
-                    <option value="10" class="bg-white text-[#1f2937]" {{ request('capacity') === '10' ? 'selected' : '' }}>≥ 10 orang</option>
-                    <option value="25" class="bg-white text-[#1f2937]" {{ request('capacity') === '25' ? 'selected' : '' }}>≥ 25 orang</option>
-                    <option value="50" class="bg-white text-[#1f2937]" {{ request('capacity') === '50' ? 'selected' : '' }}>≥ 50 orang</option>
-                    <option value="100" class="bg-white text-[#1f2937]" {{ request('capacity') === '100' ? 'selected' : '' }}>≥ 100 orang</option>
+                    <option value="">Semua Kapasitas</option>
+                    <option value="10" {{ (request('capacity_min') == '10' || request('capacity') == '10') ? 'selected' : '' }}>≥ 10 orang</option>
+                    <option value="25" {{ (request('capacity_min') == '25' || request('capacity') == '25') ? 'selected' : '' }}>≥ 25 orang</option>
+                    <option value="50" {{ (request('capacity_min') == '50' || request('capacity') == '50') ? 'selected' : '' }}>≥ 50 orang</option>
+                    <option value="100" {{ (request('capacity_min') == '100' || request('capacity') == '100') ? 'selected' : '' }}>≥ 100 orang</option>
                 </select>
             </div>
 
-            <!-- Search Button -->
-            <button 
-                type="submit"
-                class="rounded-lg bg-teal-500 px-6 py-2.5 font-bold text-white transition hover:bg-teal-400 btn-lift"
-            >
-                Cari
-            </button>
+            <!-- Action Buttons: Cari + Reset -->
+            <div class="flex gap-2">
+                <button 
+                    type="submit"
+                    class="flex-1 rounded-lg bg-teal-500 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/50 btn-lift"
+                >
+                    Cari
+                </button>
+                @if(request()->filled('search') || request()->filled('type') || request()->filled('location') || request()->filled('capacity_min') || request()->filled('capacity'))
+                    <a 
+                        href="{{ route('facilities.index') }}"
+                        class="rounded-lg border border-amber-200/40 bg-white/5 px-3.5 py-2.5 text-sm font-medium text-amber-100 hover:bg-white/10 transition inline-flex items-center justify-center"
+                        title="Reset filter"
+                    >
+                        Reset
+                    </a>
+                @endif
+            </div>
         </form>
+
+        <!-- Result count tag (SRS-07 requirement) -->
+        <div class="mt-4 flex items-center justify-between text-xs text-amber-100/80 px-1">
+            <span>Menampilkan <strong>{{ $facilities->count() }}</strong> fasilitas</span>
+            @if(request()->filled('search') || request()->filled('type') || request()->filled('location') || request()->filled('capacity_min') || request()->filled('capacity'))
+                <span class="text-teal-300">Filter aktif</span>
+            @endif
+        </div>
     </div>
 
     <!-- Facilities Grid -->
