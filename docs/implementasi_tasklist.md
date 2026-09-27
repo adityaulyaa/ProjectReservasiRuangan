@@ -46,8 +46,8 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-04 | Logout | [x] |
 | SRS-05 | Akses & Role Middleware | [x] |
 | SRS-06 | Daftar Fasilitas (Public) | [x] |
-| SRS-07 | Cari & Filter Fasilitas (Public) | [ ] |
-| SRS-08 | Ketersediaan Fasilitas per Slot (Public) | [ ] |
+| SRS-07 | Cari & Filter Fasilitas (Public) | [x] |
+| SRS-08 | Ketersediaan Fasilitas per Slot (Public) | [x] |
 | SRS-09 | Ajukan Reservasi (+ ReservationService) | [ ] |
 | SRS-10 | Riwayat & Detail Reservasi | [ ] |
 | SRS-11 | Batalkan Reservasi (User) | [ ] |
