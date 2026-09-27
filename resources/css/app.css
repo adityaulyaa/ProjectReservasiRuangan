@@ -5,17 +5,17 @@
 /* === Entrance Animations === */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+    to { opacity: 1; transform: none; }
 }
 
 @keyframes fadeInLeft {
     from { opacity: 0; transform: translateX(-50px); }
-    to { opacity: 1; transform: translateX(0); }
+    to { opacity: 1; transform: none; }
 }
 
 @keyframes fadeInRight {
     from { opacity: 0; transform: translateX(50px); }
-    to { opacity: 1; transform: translateX(0); }
+    to { opacity: 1; transform: none; }
 }
 
 @keyframes shimmer {
@@ -34,8 +34,8 @@
 }
 
 @keyframes bgZoom {
-    from { transform: scale(1.1); }
-    to { transform: scale(1); }
+    from { transform: scale(1.05); }
+    to { transform: none; }
 }
 
 /* === Animation Utility Classes === */
@@ -227,5 +227,83 @@ select option:active,
 select option:checked {
     background-color: #0284c7 !important;
     color: #ffffff !important;
+}
+
+/* === iOS 26 Liquid Glass Effect === */
+@keyframes liquidShimmer {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.liquid-glass {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.06) 40%,
+        rgba(255, 255, 255, 0.10) 60%,
+        rgba(255, 255, 255, 0.04) 100%
+    );
+    backdrop-filter: blur(40px) saturate(1.8);
+    -webkit-backdrop-filter: blur(40px) saturate(1.8);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.liquid-glass-light {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.18) 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.14) 100%
+    );
+    backdrop-filter: blur(50px) saturate(2);
+    -webkit-backdrop-filter: blur(50px) saturate(2);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.liquid-glass-slot {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.liquid-glass-slot:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(45, 212, 191, 0.4);
+    box-shadow:
+        0 4px 16px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 20px rgba(45, 212, 191, 0.08);
+    transform: translateY(-1px);
+}
+
+.liquid-glass-selected {
+    background: linear-gradient(
+        135deg,
+        rgba(45, 212, 191, 0.3) 0%,
+        rgba(20, 184, 166, 0.2) 100%
+    );
+    border: 1px solid rgba(45, 212, 191, 0.5);
+    box-shadow:
+        0 4px 20px rgba(45, 212, 191, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 0 30px rgba(45, 212, 191, 0.08);
+}
+
+.liquid-glass-disabled {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
