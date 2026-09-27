@@ -42,15 +42,9 @@
         <!-- Info -->
         <p class="mb-6 text-sm text-white/80">Kapasitas: {{ $facility->capacity }} orang</p>
 
-<!-- Detail Button -->
-    @auth
-        <a href="{{ route('facilities.availability', $facility->id) }}" class="inline-flex items-center justify-center rounded-lg bg-teal-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-600 btn-lift">
+        <!-- Detail Button -->
+        <a href="{{ route('facilities.availability', ['id' => $facility->id, 'date' => now()->toDateString()]) }}" class="inline-flex items-center justify-center rounded-lg bg-teal-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-600 btn-lift">
             Detail
         </a>
-    @else
-        <button onclick="showLoginToast()" class="inline-flex items-center justify-center rounded-lg bg-teal-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-400 btn-lift">
-            Detail
-        </button>
-    @endauth
     </div>
 </div>
