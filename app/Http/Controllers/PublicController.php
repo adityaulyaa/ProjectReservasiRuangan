@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enums\FacilityStatus;
+use App\Enums\ReservationStatus;
 use App\Models\Facility;
+use App\Models\Reservation;
+use App\Services\ReservationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class PublicController extends Controller
@@ -76,5 +80,63 @@ class PublicController extends Controller
         return view('public.facilities', compact('facilities', 'facilityStatuses', 'types', 'locations'));
     }
 
-    public function facilityAvailability($id) {}
+    public function facilityAvailability(Request $request, int|string $id): View
+    {
+        $facility = Facility::findOrFail($id);
+
+        if ($facility->status === FacilityStatus::INACTIVE || $facility->status->value === 'inactive') {
+            abort(404, 'Fasilitas tidak ditemukan atau sedang tidak aktif.');
+        }
+
+        $request->validate([
+            'date' => 'nullable|date_format:Y-m-d',
+        ]);
+
+        $date = $request->query('date', now()->toDateString());
+
+        $approvedReservations = Reservation::where('facility_id', $facility->id)
+            ->where('reservation_date', $date)
+            ->where('status', ReservationStatus::APPROVED->value)
+            ->get();
+
+        $slotMinutes = (int) config('reservation.slot_minutes', 30);
+        $slots = app(ReservationService::class)->slotsForDate();
+
+        $slotStatuses = [];
+        $bookedCount = 0;
+
+        foreach ($slots as $slot) {
+            $slotStart = Carbon::parse($slot)->format('H:i:s');
+            $slotEnd = Carbon::parse($slot)->addMinutes($slotMinutes)->format('H:i:s');
+
+            $isOccupied = $approvedReservations->contains(function ($res) use ($slotStart, $slotEnd) {
+                $resStart = Carbon::parse($res->start_time)->format('H:i:s');
+                $resEnd = Carbon::parse($res->end_time)->format('H:i:s');
+
+                return $resStart < $slotEnd && $resEnd > $slotStart;
+            });
+
+            if ($isOccupied) {
+                $bookedCount++;
+            }
+
+            $slotStatuses[] = [
+                'start' => $slot,
+                'end' => Carbon::parse($slot)->addMinutes($slotMinutes)->format('H:i'),
+                'is_occupied' => $isOccupied,
+            ];
+        }
+
+        $isMaintenance = ($facility->status === FacilityStatus::MAINTENANCE || $facility->status->value === 'maintenance');
+        $availableCount = $isMaintenance ? 0 : (count($slots) - $bookedCount);
+
+        return view('public.facility-availability', compact(
+            'facility',
+            'date',
+            'slotStatuses',
+            'isMaintenance',
+            'bookedCount',
+            'availableCount'
+        ));
+    }
 }

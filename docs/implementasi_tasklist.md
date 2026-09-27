@@ -408,14 +408,14 @@ SRS-01, SRS-07, SRS-05.
 ## Implementation Steps
 
 ### Backend
-- [ ] `PublicController::facilityAvailability(int $id)`:
+- [x] `PublicController::facilityAvailability(int $id)`:
   - `$facility = Facility::findOrFail($id)`; maintenance → banner "sedang dalam perbaikan"; inactive → tidak tersedia
   - Ambil `$date` query param (default hari ini)
   - Ambil reservasi **approved** untuk facility & tanggal tsb: `Reservation::where('facility_id',$id)->where('reservation_date',$date)->where('status','approved')->get()`
   - Pass `occupiedTimes` (map jam→bool) + `$slots` (via `ReservationService::slotsForDate()`)
 
 ### View
-- [ ] `views/public/facility-availability.blade.php`:
+- [x] `views/public/facility-availability.blade.php`:
   - Header: fasilitas info, tanggal [📅], tombol [Lihat]
   - Grid slot 07:00..19:30 → 🟩 kosong / 🟥 terbooking / ⚪ di luar jam / 🟠 fasilitas perbaikan
   - Tidak menampilkan nama pemohon/tujuan
@@ -426,10 +426,10 @@ SRS-01, SRS-07, SRS-05.
 - Maintenance → semua slot tidak bisa di-reservasi.
 
 ## Acceptance Criteria
-- [ ] GET `/facilities/{id}/availability` → grid slot benar
-- [ ] Approved reservasi tampil sebagai terbooking
-- [ ] Tanpa detail pemohon/tujuan
-- [ ] Maintenance → warning
+- [x] GET `/facilities/{id}/availability` → grid slot benar
+- [x] Approved reservasi tampil sebagai terbooking
+- [x] Tanpa detail pemohon/tujuan
+- [x] Maintenance → warning
 
 ## Completion State
 Public availability siap; SRS-09 (ajukan reservasi) menggunakan data ini.
