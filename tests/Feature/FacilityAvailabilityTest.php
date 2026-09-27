@@ -173,4 +173,32 @@ class FacilityAvailabilityTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    public function test_unauthenticated_guest_sees_login_prompt_instead_of_reservation_submit(): void
+    {
+        $facility = $this->createFacility();
+
+        $response = $this->get(route('facilities.availability', $facility->id));
+
+        $response->assertStatus(200);
+        $response->assertSee('Mode Lihat Jadwal');
+        $response->assertSee('Perlu Masuk Akun');
+        $response->assertSee('Masuk untuk Reservasi');
+        $response->assertSee(route('login'));
+        $response->assertSee(route('register'));
+        $response->assertDontSee('Lanjutkan reservasi');
+    }
+
+    public function test_authenticated_user_sees_continue_reservation_button(): void
+    {
+        $facility = $this->createFacility();
+        $user = User::factory()->create(['role' => 'user']);
+
+        $response = $this->actingAs($user)->get(route('facilities.availability', $facility->id));
+
+        $response->assertStatus(200);
+        $response->assertDontSee('Mode Lihat Jadwal');
+        $response->assertDontSee('Perlu Masuk Akun');
+        $response->assertSee('Lanjutkan reservasi');
+    }
 }

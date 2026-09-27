@@ -6,20 +6,13 @@
     <title>@yield('title', 'AksesRuang')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-sans antialiased overflow-x-hidden @if(View::hasSection('lightTheme')) bg-[#F8FAF9] text-gray-800 @endif">
+<body class="font-sans antialiased overflow-x-hidden @if(View::hasSection('lightTheme')) bg-[#F8FAF9] text-gray-800 @else bg-slate-950 text-white @endif">
     <div class="relative min-h-screen lg:overflow-x-hidden flex flex-col">
         @unless(View::hasSection('lightTheme'))
-            <div class="fixed inset-0 z-0 animate-bg-zoom" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('{{ Vite::asset('resources/images/register-bg.jpg') }}'); background-size: cover; background-position: center; background-attachment: fixed;"></div>
-
-            <div class="absolute inset-0 pointer-events-none">
-                <div class="float-circle float-circle-1"></div>
-                <div class="float-circle float-circle-2"></div>
-                <div class="float-circle float-circle-3"></div>
-                <div class="float-circle float-circle-4"></div>
-            </div>
+            <div class="fixed inset-0 z-0" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('{{ Vite::asset('resources/images/register-bg.jpg') }}'); background-size: cover; background-position: center;"></div>
 
             <!-- Dark Navigation Bar -->
-            <nav class="relative z-50 border-b border-amber-200/30 bg-black/40 backdrop-blur-md animate-fade-in-up" style="animation-fill-mode: both; animation-delay: 0.1s;">
+            <nav class="relative z-50 border-b border-amber-200/30 bg-black/40 backdrop-blur-md">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="flex h-16 items-center justify-between">
                         <!-- Logo -->
