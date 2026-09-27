@@ -48,7 +48,7 @@
         </div>
 
         <!-- ===== Top Facility Showcase Card (Liquid Glass) ===== -->
-        <div class="mb-8 rounded-3xl liquid-glass p-6 sm:p-8 animate-fade-in-up stagger-2" style="animation-fill-mode: both;">
+        <div class="mb-8 overflow-hidden rounded-2xl border border-gray-400/50 bg-black/40 shadow-2xl backdrop-blur-md p-6 sm:p-8 animate-fade-in-up stagger-2" style="animation-fill-mode: both;">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <!-- Facility Image -->
                 <div class="lg:col-span-5 overflow-hidden rounded-2xl">
@@ -146,7 +146,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in-up stagger-3" style="animation-fill-mode: both;">
 
             <!-- Left: Slot Picker Card (Liquid Glass) -->
-            <div class="lg:col-span-8 rounded-3xl liquid-glass glass-shimmer p-6 sm:p-8">
+            <div class="lg:col-span-8 overflow-hidden rounded-2xl border border-gray-400/50 bg-black/40 shadow-2xl backdrop-blur-md p-6 sm:p-8">
                 <!-- Header Row -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
@@ -232,7 +232,7 @@
             </div>
 
             <!-- Right: Summary Sidebar Card (Liquid Glass) -->
-            <div class="lg:col-span-4 rounded-3xl liquid-glass glass-shimmer p-6 sm:p-7 sticky top-6">
+            <div class="lg:col-span-4 overflow-hidden rounded-2xl border border-gray-400/50 bg-black/40 shadow-2xl backdrop-blur-md p-6 sm:p-7 sticky top-6">
                 <!-- Header -->
                 <div class="text-[11px] font-bold text-teal-300 tracking-wider uppercase">
                     RINGKASAN RESERVASI
