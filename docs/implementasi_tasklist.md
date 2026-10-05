@@ -53,7 +53,7 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-11 | Batalkan Reservasi (User) | [x] |
 | SRS-12 | Lapor Kerusakan (Upload Foto) | [x] |
 | SRS-13 | Status & Detail Laporan (User) | [x] |
-| SRS-14 | Proses Antrian Reservasi (Staff) | [ ] |
+| SRS-14 | Proses Antrian Reservasi (Staff) | [x] |
 | SRS-15 | Proses Antrian Laporan (Staff) | [ ] |
 | SRS-16 | Kelola Fasilitas (Admin CRUD) | [ ] |
 | SRS-17 | Kelola Pengguna (Admin) | [ ] |
@@ -613,30 +613,30 @@ SRS-09 (service conflict), SRS-05, SRS-01 (logs).
 ## Implementation Steps
 
 ### Service
-- [ ] `ReservationService::approve(Reservation $res, int $actorId)`:
+- [x] `ReservationService::approve(Reservation $res, int $actorId)`:
   - Jika status bukan pending → tolak
   - Cek facility active
   - Cek `checkConflict` → jika true → throw error "Terjadi bentrok dengan reservasi lain"
   - Update status approved, processed_by; createLog (approved, actor)
-- [ ] `reject(Reservation $res, string $reason, int $actorId)` — pending → rejected
-- [ ] `cancelForced(Reservation $res, string $reason, int $actorId)` — approved → cancelled, createLog
+- [x] `reject(Reservation $res, string $reason, int $actorId)` — pending → rejected
+- [x] `cancelForced(Reservation $res, string $reason, int $actorId)` — approved → cancelled, createLog
 
 ### Controller & Routes (Staff)
-- [ ] `Staff\ReservationController@queue`: reservasi status pending order by reservation_date,start_time asc, with facility+user → `views/staff/reservations/queue`
-- [ ] `@approve` (POST `staff.reservations.approve`), `@reject` (POST `staff.reservations.reject`, reject_reason required), `@cancel` (POST, cancel_reason required, hanya approved)
+- [x] `Staff\ReservationController@queue`: reservasi status pending order by reservation_date,start_time asc, with facility+user → `views/staff/reservations/queue`
+- [x] `@approve` (POST `staff.reservations.approve`), `@reject` (POST `staff.reservations.reject`, reject_reason required), `@cancel` (POST, cancel_reason required, hanya approved)
 
 ### View
-- [ ] `queue.blade.php`: kartu per reservasi (user pemohon, fasilitas, tanggal, jam, tujuan). Tombol: [✓ Setujui] (dijam bila bentrok), [✗ Tolak] (modal alasan), [Batalkan] (jika approved; modal alasan). Badge status warna.
-- [ ] Hitung bentrok per baris via `checkConflict` di controller → flag `isConflict` → disable tombol approve.
+- [x] `queue.blade.php`: kartu per reservasi (user pemohon, fasilitas, tanggal, jam, tujuan). Tombol: [✓ Setujui] (dijam bila bentrok), [✗ Tolak] (modal alasan), [Batalkan] (jika approved; modal alasan). Badge status warna.
+- [x] Hitung bentrok per baris via `checkConflict` di controller → flag `isConflict` → disable tombol approve.
 
 ## Business Rules
 - Approve hanya pending. Approve DITOLAK jika bentrok. Reject wajib alasan. Cancel darurat hanya approved, wajib alasan. Semua log/actor tercatat.
 
 ## Acceptance Criteria
-- [ ] Approve sukses → approved & log
-- [ ] Bentrok → approve ditolak
-- [ ] Reject/cancel dengan alasan berfungsi
-- [ ] Slot approved terkunci
+- [x] Approve sukses → approved & log
+- [x] Bentrok → approve ditolak
+- [x] Reject/cancel dengan alasan berfungsi
+- [x] Slot approved terkunci
 
 ## Completion State
 Staff reservasi siap; SRS-15 staff laporan.
