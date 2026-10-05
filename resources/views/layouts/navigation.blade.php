@@ -29,9 +29,23 @@
                            class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ request()->routeIs('reservations.*') ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
                             {{ __('Reservasi Saya') }}
                         </a>
+                        <a href="{{ route('reports.index') }}" 
+                           class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ request()->routeIs('reports.*') ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
+                            {{ __('Laporan Saya') }}
+                        </a>
                         <a href="{{ route('facilities.index') }}" 
                            class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ request()->routeIs('facilities.*') ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
                             {{ __('Daftar Fasilitas') }}
+                        </a>
+                    @endif
+                    @if($userRole === 'staff')
+                        <a href="{{ route('staff.reservations.queue') }}" 
+                           class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ request()->routeIs('staff.reservations.*') ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
+                            {{ __('Antrian Reservasi') }}
+                        </a>
+                        <a href="{{ route('staff.reports.queue') }}" 
+                           class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ request()->routeIs('staff.reports.*') ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
+                            {{ __('Antrian Laporan') }}
                         </a>
                     @endif
                 </div>
@@ -104,9 +118,23 @@
                    class="block py-2 text-sm font-semibold transition {{ request()->routeIs('reservations.*') ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">
                     {{ __('Reservasi Saya') }}
                 </a>
+                <a href="{{ route('reports.index') }}" 
+                   class="block py-2 text-sm font-semibold transition {{ request()->routeIs('reports.*') ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">
+                    {{ __('Laporan Saya') }}
+                </a>
                 <a href="{{ route('facilities.index') }}" 
                    class="block py-2 text-sm font-semibold transition {{ request()->routeIs('facilities.*') ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">
                     {{ __('Daftar Fasilitas') }}
+                </a>
+            @endif
+            @if($userRole === 'staff')
+                <a href="{{ route('staff.reservations.queue') }}" 
+                   class="block py-2 text-sm font-semibold transition {{ request()->routeIs('staff.reservations.*') ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">
+                    {{ __('Antrian Reservasi') }}
+                </a>
+                <a href="{{ route('staff.reports.queue') }}" 
+                   class="block py-2 text-sm font-semibold transition {{ request()->routeIs('staff.reports.*') ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">
+                    {{ __('Antrian Laporan') }}
                 </a>
             @endif
         </div>

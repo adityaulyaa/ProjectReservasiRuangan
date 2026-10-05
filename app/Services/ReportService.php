@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Enums\FacilityStatus;
 use App\Models\Facility;
+use App\Models\Report;
+use App\Models\ReportLog;
 use Illuminate\Support\Str;
 
 class ReportService
@@ -19,6 +21,21 @@ class ReportService
         $file->storeAs('reports', $name, 'public');
 
         return 'reports/'.$name;
+    }
+
+    /**
+     * Catat perubahan status laporan di report_logs.
+     */
+    public function createLog(Report $report, string $action, ?string $old = null, ?string $new = null, ?string $note = null, ?int $actorId = null): ReportLog
+    {
+        return ReportLog::create([
+            'report_id' => $report->id,
+            'actor_id' => $actorId,
+            'action' => $action,
+            'old_status' => $old,
+            'new_status' => $new,
+            'note' => $note,
+        ]);
     }
 
     /**

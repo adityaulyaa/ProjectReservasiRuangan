@@ -51,8 +51,8 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-09 | Ajukan Reservasi (+ ReservationService) | [x] |
 | SRS-10 | Riwayat & Detail Reservasi | [x] |
 | SRS-11 | Batalkan Reservasi (User) | [x] |
-| SRS-12 | Lapor Kerusakan (Upload Foto) | [ ] |
-| SRS-13 | Status & Detail Laporan (User) | [ ] |
+| SRS-12 | Lapor Kerusakan (Upload Foto) | [x] |
+| SRS-13 | Status & Detail Laporan (User) | [x] |
 | SRS-14 | Proses Antrian Reservasi (Staff) | [ ] |
 | SRS-15 | Proses Antrian Laporan (Staff) | [ ] |
 | SRS-16 | Kelola Fasilitas (Admin CRUD) | [ ] |
@@ -556,23 +556,23 @@ SRS-01 (storage, config, Report model), SRS-05.
 ## Implementation Steps
 
 ### Controller
-- [ ] `User\ReportController@create`: tampilkan semua facility + categories dari config → `view('user.reports.create')`
-- [ ] `@store(StoreReportRequest $request)`:
+- [x] `User\ReportController@create`: tampilkan semua facility + categories dari config → `view('user.reports.create')`
+- [x] `@store(StoreReportRequest $request)`:
   - Rules: `facility_id` required|exists:facilities,id; `category` required|in:config('reservation.report_categories'); `description` required|string|max:2000; `photo` nullable|image|mimes:jpg,jpeg,png|max:2048
   - Upload: jika ada file → `ReportService::handlePhotoUpload($request->file('photo'))` → simpan `storage/app/public/reports/{str_random}.{ext}` → return path `reports/{name}`
   - Simpan `Report::create([... 'status'=>'new'])`; createLog aksi `created`
   - Redirect route('reports.index') flash sukses
 
 ### View
-- [ ] `views/user/reports/create.blade.php`: form (facility select, category select, description textarea, photo input file), preview gambar (JS).
-- [ ] `views/user/reports/index.blade.php` stub (diisi SRS-13).
+- [x] `views/user/reports/create.blade.php`: form (facility select, category select, description textarea, photo input file), preview gambar (JS).
+- [x] `views/user/reports/index.blade.php` stub (diisi SRS-13).
 
 ## Business Rules
 - User lapor utk dirinya. Photo opsional. Status awal `new`. Max 2MB, mimes jpg/jpeg/png. Kategori dari config.
 
 ## Acceptance Criteria
-- [ ] Laporan tersimpan status new + log created
-- [ ] Foto tersimpan & path valid di storage/app/public/reports
+- [x] Laporan tersimpan status new + log created
+- [x] Foto tersimpan & path valid di storage/app/public/reports
 
 ## Completion State
 Laporan user siap; SRS-13 status & detail.
@@ -590,12 +590,12 @@ SRS-12, SRS-01.
 ## Implementation Steps
 
 ### Controller
-- [ ] `index`: laporan user dgn facility, latest, paginate.
-- [ ] `show(Report $report)`: abort_unless(owner OR staff/admin, 403); view dengan logs + photo URL (`Storage::disk('public')->url($report->photo_path)`).
+- [x] `index`: laporan user dgn facility, latest, paginate.
+- [x] `show(Report $report)`: abort_unless(owner OR staff/admin, 403); view dengan logs + photo URL (`Storage::disk('public')->url($report->photo_path)`).
 
 ### View
-- [ ] `index.blade.php`: tabel (fasilitas, kategori, tanggal, status badge `ReportStatus::label/color`).
-- [ ] `show.blade.php`: detail (foto jika ada, kategori, deskripsi, resolution_note, status) + timeline logs.
+- [x] `index.blade.php`: tabel (fasilitas, kategori, tanggal, status badge `ReportStatus::label/color`).
+- [x] `show.blade.php`: detail (foto jika ada, kategori, deskripsi, resolution_note, status) + timeline logs.
 
 ## Completion State
 User module selesai; SRS-14 mulai staff.
