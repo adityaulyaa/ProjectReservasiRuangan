@@ -55,9 +55,9 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-13 | Status & Detail Laporan (User) | [x] |
 | SRS-14 | Proses Antrian Reservasi (Staff) | [x] |
 | SRS-15 | Proses Antrian Laporan (Staff) | [x] |
-| SRS-16 | Kelola Fasilitas (Admin CRUD) | [ ] |
-| SRS-17 | Kelola Pengguna (Admin) | [ ] |
-| SRS-18 | Rekap & Export (Admin) | [ ] |
+| SRS-16 | Kelola Fasilitas (Admin CRUD) | [x] |
+| SRS-17 | Kelola Pengguna (Admin) | [x] |
+| SRS-18 | Rekap & Export (Admin) | [x] |
 | SRS-19 | Seeder Data Demo | [ ] |
 | SRS-20 | Dashboard Per Role | [ ] |
 | SRS-21 | Pengujian Akhir & Polish | [ ] |
@@ -693,19 +693,19 @@ SRS-01, SRS-05, SRS-06.
 ## Implementation Steps
 
 ### Controller & Request
-- [ ] `Admin\FacilityController@index`: all facilities w/ count reservations/reports, paginate.
-- [ ] `@create`, `@store(StoreFacilityRequest)`, `@edit`, `@update(UpdateFacilityRequest)`, `@show`, nonaktifkan (update status inactive).
-- [ ] FormRequest rules: `name` required|string|max:100, `type` required|string|max:50, `location` required|string|max:100, `capacity` required|integer|min:0, `description` nullable|string|max:1000, `status` required|in:active,maintenance,inactive.
-- [ ] Hapus hard hanya jika tidak ada reservations/reports terkait; default tombol "Nonaktifkan".
+- [x] `Admin\FacilityController@index`: all facilities w/ count reservations/reports, paginate.
+- [x] `@create`, `@store(StoreFacilityRequest)`, `@edit`, `@update(UpdateFacilityRequest)`, `@show`, nonaktifkan (update status inactive).
+- [x] FormRequest rules: `name` required|string|max:100, `type` required|string|max:50, `location` required|string|max:100, `capacity` required|integer|min:0, `description` nullable|string|max:1000, `status` required|in:active,maintenance,inactive.
+- [x] Hapus hard hanya jika tidak ada reservations/reports terkait; default tombol "Nonaktifkan".
 
 ### View
-- [ ] `index`: tabel (nama, tipe, lokasi, kapasitas, status badge, count reservasi, aksi Edit, [Nonaktifkan|Aktifkan], Show).
-- [ ] `create`/`edit`: form lengkap + select status.
+- [x] `index`: tabel (nama, tipe, lokasi, kapasitas, status badge, count reservasi, aksi Edit, [Nonaktifkan|Aktifkan], Show).
+- [x] `create`/`edit`: form lengkap + select status.
 
 ## Acceptance Criteria
-- [ ] Tambah/edit berhasil
-- [ ] Status diubah via form
-- [ ] Nonaktif → tidak tampil public
+- [x] Tambah/edit berhasil
+- [x] Status diubah via form
+- [x] Nonaktif → tidak tampil public
 
 ## Completion State
 Master fasilitas siap; SRS-17 kelola user.
@@ -723,21 +723,21 @@ SRS-05, SRS-02.
 ## Implementation Steps
 
 ### Controller & Request
-- [ ] `Admin\UserController@index`: users list w/ filter role+status+search, paginate; include verifikasi column.
-- [ ] `@create` & `@store(StoreUserRequest)`:
+- [x] `Admin\UserController@index`: users list w/ filter role+status+search, paginate; include verifikasi column.
+- [x] `@create` & `@store(StoreUserRequest)`:
   - Rules: name required, email required|unique, password required|min:8, role required|in:user,staff (admin TIDAK dibuat via form)
   - Saat create: `is_verified=true` (admin langsung aktif)
-- [ ] `@verify` (POST `admin.users.verify`): set is_verified=true
-- [ ] `@reject` (POST `admin.users.reject`): set is_verified=false (tampil menunggu)
+- [x] `@verify` (POST `admin.users.verify`): set is_verified=true
+- [x] `@reject` (POST `admin.users.reject`): set is_verified=false (tampil menunggu)
 
 ### View
-- [ ] `index`: tabel (name, email, role badge, is_verified badge ✅/⏳, aksi [Verifikasi]/[Tolak] untuk unverified, [Edit]).
-- [ ] `create`: form (name, email, password, role select [user|staff]).
-- [ ] Jangan tampilkan dropdown role admin.
+- [x] `index`: tabel (name, email, role badge, is_verified badge ✅/⏳, aksi [Verifikasi]/[Tolak] untuk unverified, [Edit]).
+- [x] `create`: form (name, email, password, role select [user|staff]).
+- [x] Jangan tampilkan dropdown role admin.
 
 ## Acceptance Criteria
-- [ ] Admin buat user/staff → langsung aktif
-- [ ] Verify & reject akun mandiri berfungsi
+- [x] Admin buat user/staff → langsung aktif
+- [x] Verify & reject akun mandiri berfungsi
 
 ## Completion State
 User management siap; SRS-18 export rekap.
@@ -755,20 +755,20 @@ SRS-14/15 (data), SRS-16 (facilities), SRS-17.
 ## Implementation Steps
 
 ### Dashboard Rekap
-- [ ] `Admin\ReportController@index`: filter `from`,`to`,`facility_id`, `location`; tampilkan tabel rekap (okupasi per facility, frekuensi kerusakan).
+- [x] `Admin\ReportController@index`: filter `from`,`to`,`facility_id`, `location`; tampilkan tabel rekap (okupasi per facility, frekuensi kerusakan).
 
 ### Export
-- [ ] **CSV**: method `exportCsv`: StreamedResponse, `text/csv`, nama file `rekap-{date}.csv`, kolom: tipe, nama, lokasi, jumlah reservasi approved, okupansi %, jumlah laporan.
-- [ ] **Excel**: `.xls` HTML table (BOM UTF-8).
-- [ ] **PDF**: install `barryvdh/laravel-dompdf` (composer require). Buat view `views/admin/reports/export-pdf.blade.php` → `PDF::loadView(...)->download()`.
+- [x] **CSV**: method `exportCsv`: StreamedResponse, `text/csv`, nama file `rekap-{date}.csv`, kolom: tipe, nama, lokasi, jumlah reservasi approved, okupansi %, jumlah laporan.
+- [x] **Excel**: `.xls` HTML table (BOM UTF-8).
+- [x] **PDF**: install `barryvdh/laravel-dompdf` (composer require). Buat view `views/admin/reports/export-pdf.blade.php` → `PDF::loadView(...)->download()`.
 
 ### View
-- [ ] `admin/reports/index.blade.php`: filter form + tabel rekap + tombol [Export CSV] [Export Excel] [Export PDF].
+- [x] `admin/reports/index.blade.php`: filter form + tabel rekap + tombol [Export CSV] [Export Excel] [Export PDF].
 
 ## Acceptance Criteria
-- [ ] Rekap tampil
-- [ ] CSV/Excel/PDF unduh berisi data
-- [ ] Filter bekerja
+- [x] Rekap tampil
+- [x] CSV/Excel/PDF unduh berisi data
+- [x] Filter bekerja
 
 ## Completion State
 Admin export siap; SRS-19 seeder.

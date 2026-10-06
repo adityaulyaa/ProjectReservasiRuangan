@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
-use App\Models\Reservation;
 use App\Models\Report;
+use App\Models\Reservation;
 
 class DashboardController extends Controller
 {

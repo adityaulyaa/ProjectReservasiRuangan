@@ -7,7 +7,6 @@ use App\Enums\ReservationStatus;
 use App\Enums\Role;
 use App\Models\Facility;
 use App\Models\Reservation;
-use App\Models\ReservationLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
