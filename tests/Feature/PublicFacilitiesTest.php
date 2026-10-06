@@ -103,6 +103,61 @@ class PublicFacilitiesTest extends TestCase
         $response->assertSee('50 orang');
     }
 
+    public function test_can_filter_facilities_by_search_name(): void
+    {
+        $this->createFacility(['name' => 'Lab Komputer A', 'status' => FacilityStatus::ACTIVE->value]);
+        $this->createFacility(['name' => 'Ruang Seminar', 'status' => FacilityStatus::ACTIVE->value]);
+
+        $response = $this->get('/facilities?search=Komputer');
+
+        $response->assertStatus(200);
+        $facilities = $response->viewData('facilities');
+        $this->assertCount(1, $facilities);
+        $this->assertEquals('Lab Komputer A', $facilities->first()->name);
+    }
+
+    public function test_can_filter_facilities_by_type(): void
+    {
+        $this->createFacility(['name' => 'Ruang 1', 'type' => 'Laboratorium', 'status' => FacilityStatus::ACTIVE->value]);
+        $this->createFacility(['name' => 'Ruang 2', 'type' => 'Kelas', 'status' => FacilityStatus::ACTIVE->value]);
+
+        $response = $this->get('/facilities?type=Laboratorium');
+
+        $response->assertStatus(200);
+        $facilities = $response->viewData('facilities');
+        $this->assertCount(1, $facilities);
+        $this->assertEquals('Ruang 1', $facilities->first()->name);
+    }
+
+    public function test_can_filter_facilities_by_location(): void
+    {
+        $this->createFacility(['name' => 'Ruang 1', 'location' => 'Gedung A Lt.2', 'status' => FacilityStatus::ACTIVE->value]);
+        $this->createFacility(['name' => 'Ruang 2', 'location' => 'Gedung B Lt.1', 'status' => FacilityStatus::ACTIVE->value]);
+
+        $response = $this->get('/facilities?location=Gedung+A');
+
+        $response->assertStatus(200);
+        $facilities = $response->viewData('facilities');
+        $this->assertCount(1, $facilities);
+        $this->assertEquals('Ruang 1', $facilities->first()->name);
+    }
+
+    public function test_can_filter_facilities_by_capacity_min(): void
+    {
+        $this->createFacility(['name' => 'Kecil', 'capacity' => 10, 'status' => FacilityStatus::ACTIVE->value]);
+        $this->createFacility(['name' => 'Sedang', 'capacity' => 30, 'status' => FacilityStatus::ACTIVE->value]);
+        $this->createFacility(['name' => 'Besar', 'capacity' => 100, 'status' => FacilityStatus::ACTIVE->value]);
+
+        $response = $this->get('/facilities?capacity_min=30');
+
+        $response->assertStatus(200);
+        $facilities = $response->viewData('facilities');
+        $this->assertCount(2, $facilities);
+        $this->assertFalse($facilities->contains('name', 'Kecil'));
+        $this->assertTrue($facilities->contains('name', 'Sedang'));
+        $this->assertTrue($facilities->contains('name', 'Besar'));
+    }
+
     private function createFacility(array $attributes = []): Facility
     {
         $defaults = [

@@ -16,12 +16,15 @@ class ReservationService
      */
     public function checkConflict(int $facilityId, string $date, string $start, string $end, ?int $excludeId = null): bool
     {
+        $startTime = strlen($start) === 5 ? $start.':00' : $start;
+        $endTime = strlen($end) === 5 ? $end.':00' : $end;
+
         $query = Reservation::where('facility_id', $facilityId)
             ->where('reservation_date', $date)
             ->where('status', ReservationStatus::APPROVED->value)
-            ->where(function ($q) use ($start, $end) {
-                $q->where('start_time', '<', $end)
-                    ->where('end_time', '>', $start);
+            ->where(function ($q) use ($startTime, $endTime) {
+                $q->where('start_time', '<', $endTime)
+                    ->where('end_time', '>', $startTime);
             });
 
         if ($excludeId !== null) {
@@ -55,7 +58,7 @@ class ReservationService
             $errors[] = "Slot waktu wajib berada dalam jam operasional ({$open}–{$close}).";
         }
 
-        if ($startTime->minute() % $slotMinutes !== 0 || $endTime->minute() % $slotMinutes !== 0) {
+        if ($startTime->minute % $slotMinutes !== 0 || $endTime->minute % $slotMinutes !== 0) {
             $errors[] = "Slot waktu wajib kelipatan {$slotMinutes} menit.";
         }
 
