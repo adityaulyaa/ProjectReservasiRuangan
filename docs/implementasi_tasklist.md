@@ -54,7 +54,7 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-12 | Lapor Kerusakan (Upload Foto) | [x] |
 | SRS-13 | Status & Detail Laporan (User) | [x] |
 | SRS-14 | Proses Antrian Reservasi (Staff) | [x] |
-| SRS-15 | Proses Antrian Laporan (Staff) | [ ] |
+| SRS-15 | Proses Antrian Laporan (Staff) | [x] |
 | SRS-16 | Kelola Fasilitas (Admin CRUD) | [ ] |
 | SRS-17 | Kelola Pengguna (Admin) | [ ] |
 | SRS-18 | Rekap & Export (Admin) | [ ] |
@@ -654,28 +654,28 @@ SRS-13, SRS-01, SRS-05.
 ## Implementation Steps
 
 ### Service
-- [ ] `ReportService::updateStatus(Report $report, ReportStatus $status, ?string $note, int $actorId)`:
+- [x] `ReportService::updateStatus(Report $report, ReportStatus $status, ?string $note, int $actorId)`:
   - Transisi valid: new→in_progress; in_progress→resolved (wajib note); in_progress→rejected (wajib note); new→resolved|rejected (wajib note)
   - Set status, resolution_note, processed_by; createLog (report_logs) dgn action status_changed/resolved
-- [ ] `markFacilityMaintenance(int $facilityId)` → `Facility::find($id)->update(['status'=>'maintenance'])`
-- [ ] `markFacilityActive(int $facilityId)` → `Facility::find($id)->update(['status'=>'active'])`
+- [x] `markFacilityMaintenance(int $facilityId)` → `Facility::find($id)->update(['status'=>'maintenance'])`
+- [x] `markFacilityActive(int $facilityId)` → `Facility::find($id)->update(['status'=>'active'])`
 
 ### Controller & Routes (Staff)
-- [ ] `Staff\ReportController@queue`: reports status new & in_progress, with facility+user → `views/staff/reports/queue`
-- [ ] `@show(Report $report)`: detail + foto + logs
-- [ ] `@updateStatus(Report $report)` (POST): status in_progress/resolved/rejected, resolution_note required jika resolved/rejected
-- [ ] `@markMaintenance(Report $report)` (POST): tandai facility maintenance
-- [ ] `@markActive(Report $report)` (POST): fasilitas kembali active
+- [x] `Staff\ReportController@queue`: reports status new & in_progress, with facility+user → `views/staff/reports/queue`
+- [x] `@show(Report $report)`: detail + foto + logs
+- [x] `@updateStatus(Report $report)` (POST): status in_progress/resolved/rejected, resolution_note required jika resolved/rejected
+- [x] `@markMaintenance(Report $report)` (POST): tandai facility maintenance
+- [x] `@markActive(Report $report)` (POST): fasilitas kembali active
 
 ### View
-- [ ] `queue.blade`: kartu laporan (fasilitas, kategori, tanggal, status badge). Aksi: [Terima/Mulai Proses] → in_progress; [Tandai Perbaikan] → maintenance; [Selesai] → modal resolution_note → resolved + facility active opsional; [Tolak] → modal note → rejected; [Lihat] detail + foto.
+- [x] `queue.blade`: kartu laporan (fasilitas, kategori, tanggal, status badge). Aksi: [Terima/Mulai Proses] → in_progress; [Tandai Perbaikan] → maintenance; [Selesai] → modal resolution_note → resolved + facility active opsional; [Tolak] → modal note → rejected; [Lihat] detail + foto.
 
 ## Acceptance Criteria
-- [ ] Staff ubah status laporan
-- [ ] Resolved/Rejected menyimpan resolution_note
-- [ ] Tandai maintenance → facility status maintenance
-- [ ] Selesai → facility aktif kembali
-- [ ] Log tercatat
+- [x] Staff ubah status laporan
+- [x] Resolved/Rejected menyimpan resolution_note
+- [x] Tandai maintenance → facility status maintenance
+- [x] Selesai → facility aktif kembali
+- [x] Log tercatat
 
 ## Completion State
 Staff module selesai; SRS-16 admin master fasilitas.

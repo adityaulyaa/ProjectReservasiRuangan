@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* === Alpine x-cloak: cegah konten modal berkedip sebelum Alpine init === */
+[x-cloak] {
+    display: none !important;
+}
+
 /* === Entrance Animations === */
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(30px); }

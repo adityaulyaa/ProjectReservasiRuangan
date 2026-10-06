@@ -264,7 +264,7 @@
     {{-- Modal Pembatalan Reservasi (SRS-11) --}}
     @if($canCancel)
         <x-modal name="confirm-reservation-cancellation" focusable>
-            <form method="POST" action="{{ route('reservations.cancel', $reservation->id) }}" class="p-6 bg-slate-900 text-white rounded-3xl border border-white/15">
+            <form method="POST" action="{{ route('reservations.cancel', $reservation->id) }}" class="p-6 bg-slate-900 text-white rounded-lg border border-white/15">
                 @csrf
 
                 <div class="flex items-center gap-3 text-rose-400 mb-4">

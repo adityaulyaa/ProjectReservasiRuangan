@@ -34,3 +34,5 @@ Thumbs.db
 .DS_Store
 temp-laravel/
 CLAUDE.md
+
+opencode.json
