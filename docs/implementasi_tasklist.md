@@ -51,10 +51,10 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-09 | Ajukan Reservasi (+ ReservationService) | [x] |
 | SRS-10 | Riwayat & Detail Reservasi | [x] |
 | SRS-11 | Batalkan Reservasi (User) | [x] |
-| SRS-12 | Lapor Kerusakan (Upload Foto) | [ ] |
-| SRS-13 | Status & Detail Laporan (User) | [ ] |
-| SRS-14 | Proses Antrian Reservasi (Staff) | [ ] |
-| SRS-15 | Proses Antrian Laporan (Staff) | [ ] |
+| SRS-12 | Lapor Kerusakan (Upload Foto) | [x] |
+| SRS-13 | Status & Detail Laporan (User) | [x] |
+| SRS-14 | Proses Antrian Reservasi (Staff) | [x] |
+| SRS-15 | Proses Antrian Laporan (Staff) | [x] |
 | SRS-16 | Kelola Fasilitas (Admin CRUD) | [ ] |
 | SRS-17 | Kelola Pengguna (Admin) | [ ] |
 | SRS-18 | Rekap & Export (Admin) | [ ] |
@@ -556,23 +556,23 @@ SRS-01 (storage, config, Report model), SRS-05.
 ## Implementation Steps
 
 ### Controller
-- [ ] `User\ReportController@create`: tampilkan semua facility + categories dari config → `view('user.reports.create')`
-- [ ] `@store(StoreReportRequest $request)`:
+- [x] `User\ReportController@create`: tampilkan semua facility + categories dari config → `view('user.reports.create')`
+- [x] `@store(StoreReportRequest $request)`:
   - Rules: `facility_id` required|exists:facilities,id; `category` required|in:config('reservation.report_categories'); `description` required|string|max:2000; `photo` nullable|image|mimes:jpg,jpeg,png|max:2048
   - Upload: jika ada file → `ReportService::handlePhotoUpload($request->file('photo'))` → simpan `storage/app/public/reports/{str_random}.{ext}` → return path `reports/{name}`
   - Simpan `Report::create([... 'status'=>'new'])`; createLog aksi `created`
   - Redirect route('reports.index') flash sukses
 
 ### View
-- [ ] `views/user/reports/create.blade.php`: form (facility select, category select, description textarea, photo input file), preview gambar (JS).
-- [ ] `views/user/reports/index.blade.php` stub (diisi SRS-13).
+- [x] `views/user/reports/create.blade.php`: form (facility select, category select, description textarea, photo input file), preview gambar (JS).
+- [x] `views/user/reports/index.blade.php` stub (diisi SRS-13).
 
 ## Business Rules
 - User lapor utk dirinya. Photo opsional. Status awal `new`. Max 2MB, mimes jpg/jpeg/png. Kategori dari config.
 
 ## Acceptance Criteria
-- [ ] Laporan tersimpan status new + log created
-- [ ] Foto tersimpan & path valid di storage/app/public/reports
+- [x] Laporan tersimpan status new + log created
+- [x] Foto tersimpan & path valid di storage/app/public/reports
 
 ## Completion State
 Laporan user siap; SRS-13 status & detail.
@@ -590,12 +590,12 @@ SRS-12, SRS-01.
 ## Implementation Steps
 
 ### Controller
-- [ ] `index`: laporan user dgn facility, latest, paginate.
-- [ ] `show(Report $report)`: abort_unless(owner OR staff/admin, 403); view dengan logs + photo URL (`Storage::disk('public')->url($report->photo_path)`).
+- [x] `index`: laporan user dgn facility, latest, paginate.
+- [x] `show(Report $report)`: abort_unless(owner OR staff/admin, 403); view dengan logs + photo URL (`Storage::disk('public')->url($report->photo_path)`).
 
 ### View
-- [ ] `index.blade.php`: tabel (fasilitas, kategori, tanggal, status badge `ReportStatus::label/color`).
-- [ ] `show.blade.php`: detail (foto jika ada, kategori, deskripsi, resolution_note, status) + timeline logs.
+- [x] `index.blade.php`: tabel (fasilitas, kategori, tanggal, status badge `ReportStatus::label/color`).
+- [x] `show.blade.php`: detail (foto jika ada, kategori, deskripsi, resolution_note, status) + timeline logs.
 
 ## Completion State
 User module selesai; SRS-14 mulai staff.
@@ -613,30 +613,30 @@ SRS-09 (service conflict), SRS-05, SRS-01 (logs).
 ## Implementation Steps
 
 ### Service
-- [ ] `ReservationService::approve(Reservation $res, int $actorId)`:
+- [x] `ReservationService::approve(Reservation $res, int $actorId)`:
   - Jika status bukan pending → tolak
   - Cek facility active
   - Cek `checkConflict` → jika true → throw error "Terjadi bentrok dengan reservasi lain"
   - Update status approved, processed_by; createLog (approved, actor)
-- [ ] `reject(Reservation $res, string $reason, int $actorId)` — pending → rejected
-- [ ] `cancelForced(Reservation $res, string $reason, int $actorId)` — approved → cancelled, createLog
+- [x] `reject(Reservation $res, string $reason, int $actorId)` — pending → rejected
+- [x] `cancelForced(Reservation $res, string $reason, int $actorId)` — approved → cancelled, createLog
 
 ### Controller & Routes (Staff)
-- [ ] `Staff\ReservationController@queue`: reservasi status pending order by reservation_date,start_time asc, with facility+user → `views/staff/reservations/queue`
-- [ ] `@approve` (POST `staff.reservations.approve`), `@reject` (POST `staff.reservations.reject`, reject_reason required), `@cancel` (POST, cancel_reason required, hanya approved)
+- [x] `Staff\ReservationController@queue`: reservasi status pending order by reservation_date,start_time asc, with facility+user → `views/staff/reservations/queue`
+- [x] `@approve` (POST `staff.reservations.approve`), `@reject` (POST `staff.reservations.reject`, reject_reason required), `@cancel` (POST, cancel_reason required, hanya approved)
 
 ### View
-- [ ] `queue.blade.php`: kartu per reservasi (user pemohon, fasilitas, tanggal, jam, tujuan). Tombol: [✓ Setujui] (dijam bila bentrok), [✗ Tolak] (modal alasan), [Batalkan] (jika approved; modal alasan). Badge status warna.
-- [ ] Hitung bentrok per baris via `checkConflict` di controller → flag `isConflict` → disable tombol approve.
+- [x] `queue.blade.php`: kartu per reservasi (user pemohon, fasilitas, tanggal, jam, tujuan). Tombol: [✓ Setujui] (dijam bila bentrok), [✗ Tolak] (modal alasan), [Batalkan] (jika approved; modal alasan). Badge status warna.
+- [x] Hitung bentrok per baris via `checkConflict` di controller → flag `isConflict` → disable tombol approve.
 
 ## Business Rules
 - Approve hanya pending. Approve DITOLAK jika bentrok. Reject wajib alasan. Cancel darurat hanya approved, wajib alasan. Semua log/actor tercatat.
 
 ## Acceptance Criteria
-- [ ] Approve sukses → approved & log
-- [ ] Bentrok → approve ditolak
-- [ ] Reject/cancel dengan alasan berfungsi
-- [ ] Slot approved terkunci
+- [x] Approve sukses → approved & log
+- [x] Bentrok → approve ditolak
+- [x] Reject/cancel dengan alasan berfungsi
+- [x] Slot approved terkunci
 
 ## Completion State
 Staff reservasi siap; SRS-15 staff laporan.
@@ -654,28 +654,28 @@ SRS-13, SRS-01, SRS-05.
 ## Implementation Steps
 
 ### Service
-- [ ] `ReportService::updateStatus(Report $report, ReportStatus $status, ?string $note, int $actorId)`:
+- [x] `ReportService::updateStatus(Report $report, ReportStatus $status, ?string $note, int $actorId)`:
   - Transisi valid: new→in_progress; in_progress→resolved (wajib note); in_progress→rejected (wajib note); new→resolved|rejected (wajib note)
   - Set status, resolution_note, processed_by; createLog (report_logs) dgn action status_changed/resolved
-- [ ] `markFacilityMaintenance(int $facilityId)` → `Facility::find($id)->update(['status'=>'maintenance'])`
-- [ ] `markFacilityActive(int $facilityId)` → `Facility::find($id)->update(['status'=>'active'])`
+- [x] `markFacilityMaintenance(int $facilityId)` → `Facility::find($id)->update(['status'=>'maintenance'])`
+- [x] `markFacilityActive(int $facilityId)` → `Facility::find($id)->update(['status'=>'active'])`
 
 ### Controller & Routes (Staff)
-- [ ] `Staff\ReportController@queue`: reports status new & in_progress, with facility+user → `views/staff/reports/queue`
-- [ ] `@show(Report $report)`: detail + foto + logs
-- [ ] `@updateStatus(Report $report)` (POST): status in_progress/resolved/rejected, resolution_note required jika resolved/rejected
-- [ ] `@markMaintenance(Report $report)` (POST): tandai facility maintenance
-- [ ] `@markActive(Report $report)` (POST): fasilitas kembali active
+- [x] `Staff\ReportController@queue`: reports status new & in_progress, with facility+user → `views/staff/reports/queue`
+- [x] `@show(Report $report)`: detail + foto + logs
+- [x] `@updateStatus(Report $report)` (POST): status in_progress/resolved/rejected, resolution_note required jika resolved/rejected
+- [x] `@markMaintenance(Report $report)` (POST): tandai facility maintenance
+- [x] `@markActive(Report $report)` (POST): fasilitas kembali active
 
 ### View
-- [ ] `queue.blade`: kartu laporan (fasilitas, kategori, tanggal, status badge). Aksi: [Terima/Mulai Proses] → in_progress; [Tandai Perbaikan] → maintenance; [Selesai] → modal resolution_note → resolved + facility active opsional; [Tolak] → modal note → rejected; [Lihat] detail + foto.
+- [x] `queue.blade`: kartu laporan (fasilitas, kategori, tanggal, status badge). Aksi: [Terima/Mulai Proses] → in_progress; [Tandai Perbaikan] → maintenance; [Selesai] → modal resolution_note → resolved + facility active opsional; [Tolak] → modal note → rejected; [Lihat] detail + foto.
 
 ## Acceptance Criteria
-- [ ] Staff ubah status laporan
-- [ ] Resolved/Rejected menyimpan resolution_note
-- [ ] Tandai maintenance → facility status maintenance
-- [ ] Selesai → facility aktif kembali
-- [ ] Log tercatat
+- [x] Staff ubah status laporan
+- [x] Resolved/Rejected menyimpan resolution_note
+- [x] Tandai maintenance → facility status maintenance
+- [x] Selesai → facility aktif kembali
+- [x] Log tercatat
 
 ## Completion State
 Staff module selesai; SRS-16 admin master fasilitas.

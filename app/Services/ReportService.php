@@ -3,8 +3,12 @@
 namespace App\Services;
 
 use App\Enums\FacilityStatus;
+use App\Enums\ReportStatus;
 use App\Models\Facility;
+use App\Models\Report;
+use App\Models\ReportLog;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ReportService
 {
@@ -19,6 +23,74 @@ class ReportService
         $file->storeAs('reports', $name, 'public');
 
         return 'reports/'.$name;
+    }
+
+    /**
+     * Catat perubahan status laporan di report_logs.
+     */
+    public function createLog(Report $report, string $action, ?string $old = null, ?string $new = null, ?string $note = null, ?int $actorId = null): ReportLog
+    {
+        return ReportLog::create([
+            'report_id' => $report->id,
+            'actor_id' => $actorId,
+            'action' => $action,
+            'old_status' => $old,
+            'new_status' => $new,
+            'note' => $note,
+        ]);
+    }
+
+    /**
+     * Ubah status laporan sesuai transisi yang valid (SRS-15).
+     * new → in_progress; new/in_progress → resolved|rejected (wajib note).
+     * Note wajib ketika status tujuan resolved atau rejected.
+     *
+     * @throws ValidationException
+     */
+    public function updateStatus(Report $report, ReportStatus $status, ?string $note, int $actorId): void
+    {
+        $current = $report->status;
+
+        $allowed = [
+            ReportStatus::NEW->value => [
+                ReportStatus::IN_PROGRESS->value,
+                ReportStatus::RESOLVED->value,
+                ReportStatus::REJECTED->value,
+            ],
+            ReportStatus::IN_PROGRESS->value => [
+                ReportStatus::RESOLVED->value,
+                ReportStatus::REJECTED->value,
+            ],
+        ];
+
+        if (! in_array($status->value, $allowed[$current->value] ?? [], true)) {
+            throw ValidationException::withMessages([
+                'status' => 'Perubahan status laporan tidak valid.',
+            ]);
+        }
+
+        if (in_array($status->value, [ReportStatus::RESOLVED->value, ReportStatus::REJECTED->value], true) && blank($note)) {
+            throw ValidationException::withMessages([
+                'resolution_note' => 'Catatan resolusi wajib diisi untuk status selesai atau ditolak.',
+            ]);
+        }
+
+        $oldStatus = $current->value;
+
+        $report->update([
+            'status' => $status->value,
+            'resolution_note' => $note,
+            'processed_by' => $actorId,
+        ]);
+
+        $action = match ($status) {
+            ReportStatus::IN_PROGRESS => 'in_progress',
+            ReportStatus::RESOLVED => 'resolved',
+            ReportStatus::REJECTED => 'rejected',
+            default => 'status_changed',
+        };
+
+        $this->createLog($report, $action, $oldStatus, $status->value, $note, $actorId);
     }
 
     /**

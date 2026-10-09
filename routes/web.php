@@ -23,11 +23,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('role:user,staff,admin')
         ->name('reservations.show');
 
+    Route::get('reports/{report}', [ReportController::class, 'show'])
+        ->whereNumber('report')
+        ->middleware('role:user,staff,admin')
+        ->name('reports.show');
+
     Route::middleware('role:user')->group(function () {
         Route::resource('reservations', ReservationController::class)->except(['show']);
         Route::post('reservations/{id}/cancel', [ReservationController::class, 'cancel'])->name('reservations.cancel');
 
-        Route::resource('reports', ReportController::class);
+        Route::resource('reports', ReportController::class)->except(['show']);
     });
 });
 

@@ -93,6 +93,99 @@ class ReservationService
     }
 
     /**
+     * Setujui reservasi (pending → approved).
+     * Cek facility active & anti-bentrok sebelum approve.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function approve(Reservation $reservation, int $actorId): void
+    {
+        if ($reservation->status !== ReservationStatus::PENDING) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Hanya reservasi berstatus menunggu yang dapat disetujui.',
+            ]);
+        }
+
+        $facility = $reservation->facility;
+        $facilityError = $this->checkAvailableFacility($facility);
+        if ($facilityError) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'facility' => $facilityError,
+            ]);
+        }
+
+        $hasConflict = $this->checkConflict(
+            $reservation->facility_id,
+            $reservation->reservation_date instanceof \DateTimeInterface
+                ? $reservation->reservation_date->format('Y-m-d')
+                : (string) $reservation->reservation_date,
+            $reservation->start_time,
+            $reservation->end_time,
+            $reservation->id,
+        );
+
+        if ($hasConflict) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'conflict' => 'Terjadi bentrok dengan reservasi lain yang sudah disetujui pada slot waktu yang sama.',
+            ]);
+        }
+
+        $oldStatus = $reservation->status->value;
+        $reservation->update([
+            'status' => ReservationStatus::APPROVED->value,
+            'processed_by' => $actorId,
+        ]);
+
+        $this->createLog($reservation, 'approved', $oldStatus, 'approved', 'Reservasi disetujui oleh petugas.', $actorId);
+    }
+
+    /**
+     * Tolak reservasi (pending → rejected) dengan alasan wajib.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function reject(Reservation $reservation, string $reason, int $actorId): void
+    {
+        if ($reservation->status !== ReservationStatus::PENDING) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Hanya reservasi berstatus menunggu yang dapat ditolak.',
+            ]);
+        }
+
+        $oldStatus = $reservation->status->value;
+        $reservation->update([
+            'status' => ReservationStatus::REJECTED->value,
+            'reject_reason' => $reason,
+            'processed_by' => $actorId,
+        ]);
+
+        $this->createLog($reservation, 'rejected', $oldStatus, 'rejected', $reason, $actorId);
+    }
+
+    /**
+     * Pembatalan darurat oleh petugas (approved → cancelled) dengan alasan wajib.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function cancelForced(Reservation $reservation, string $reason, int $actorId): void
+    {
+        if ($reservation->status !== ReservationStatus::APPROVED) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Pembatalan darurat hanya berlaku untuk reservasi yang sudah disetujui.',
+            ]);
+        }
+
+        $oldStatus = $reservation->status->value;
+        $reservation->update([
+            'status' => ReservationStatus::CANCELLED->value,
+            'cancel_reason' => $reason,
+            'processed_by' => $actorId,
+        ]);
+
+        $this->createLog($reservation, 'cancelled_forced', $oldStatus, 'cancelled', $reason, $actorId);
+    }
+
+    /**
      * Daftar slot waktu tersedia per hari (07:00, 07:30, ..., 19:30).
      *
      * @return array<string>

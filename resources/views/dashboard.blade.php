@@ -70,7 +70,7 @@
             </div>
 
             {{-- Quick Links / Navigation Cards --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <a href="{{ route('reservations.index') }}" class="group liquid-glass rounded-3xl p-6 border border-white/10 hover:border-teal-400/40 hover:bg-white/10 transition flex items-center justify-between shadow-xl">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-teal-500/20 text-slate-300 group-hover:text-teal-300 flex items-center justify-center border border-white/10 transition">
@@ -79,11 +79,28 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-bold text-white group-hover:text-teal-300 transition text-base">Riwayat Reservasi Saya</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Pantau status, lihat catatan petugas, dan kelola pembatalan</p>
+                            <h3 class="font-bold text-white group-hover:text-teal-300 transition text-base">Riwayat Reservasi</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Pantau status & kelola pembatalan</p>
                         </div>
                     </div>
-                    <svg class="w-5 h-5 text-slate-400 group-hover:text-teal-300 transition transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-teal-300 transition transform group-hover:translate-x-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
+                <a href="{{ route('reports.index') }}" class="group liquid-glass rounded-3xl p-6 border border-white/10 hover:border-rose-400/40 hover:bg-white/10 transition flex items-center justify-between shadow-xl">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-white/10 group-hover:bg-rose-500/20 text-slate-300 group-hover:text-rose-300 flex items-center justify-center border border-white/10 transition">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white group-hover:text-rose-300 transition text-base">Laporan Kerusakan</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Pantau status & buat laporan baru</p>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-rose-300 transition transform group-hover:translate-x-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
@@ -96,11 +113,11 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-bold text-white group-hover:text-teal-300 transition text-base">Katalog Fasilitas & Ruangan</h3>
-                            <p class="text-xs text-slate-400 mt-0.5">Eksplorasi kapasitas ruangan dan cek slot jadwal ketersediaan</p>
+                            <h3 class="font-bold text-white group-hover:text-teal-300 transition text-base">Katalog Fasilitas</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Eksplorasi & cek slot ketersediaan</p>
                         </div>
                     </div>
-                    <svg class="w-5 h-5 text-slate-400 group-hover:text-teal-300 transition transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-teal-300 transition transform group-hover:translate-x-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
