@@ -17,13 +17,41 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-6 sm:-my-px sm:flex">
-                    <a href="{{ route('dashboard') }}" 
-                       class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ request()->routeIs('dashboard') ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
-                        {{ __('Dashboard') }}
-                    </a>
                     @php
                         $userRole = is_object(Auth::user()->role) ? Auth::user()->role->value : Auth::user()->role;
+                        $dashboardRoute = match($userRole) {
+                            'admin' => route('admin.dashboard'),
+                            'staff' => route('staff.dashboard'),
+                            default => route('dashboard'),
+                        };
+                        $isDashboardActive = match($userRole) {
+                            'admin' => request()->routeIs('admin.dashboard'),
+                            'staff' => request()->routeIs('staff.dashboard'),
+                            default => request()->routeIs('dashboard'),
+                        };
                     @endphp
+                    <a href="{{ $dashboardRoute }}" 
+                       class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ $isDashboardActive ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
+                        {{ __('Dashboard') }}
+                    </a>
+                    @if($userRole === 'admin')
+                        <a href="{{ route('admin.facilities.index') }}" 
+                           class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ request()->routeIs('admin.facilities.*') ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
+                            {{ __('Kelola Fasilitas') }}
+                        </a>
+                        <a href="{{ route('admin.users.index') }}" 
+                           class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ request()->routeIs('admin.users.*') ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
+                            {{ __('Kelola Pengguna') }}
+                        </a>
+                        <a href="{{ route('admin.reports.index') }}" 
+                           class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ request()->routeIs('admin.reports.*') ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
+                            {{ __('Rekap & Laporan') }}
+                        </a>
+                        <a href="{{ route('facilities.index') }}" 
+                           class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ request()->routeIs('facilities.*') ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
+                            {{ __('Daftar Fasilitas') }}
+                        </a>
+                    @endif
                     @if($userRole === 'user')
                         <a href="{{ route('reservations.index') }}" 
                            class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold transition {{ request()->routeIs('reservations.*') ? 'border-teal-400 text-teal-300' : 'border-transparent text-slate-300 hover:text-white hover:border-white/30' }}">
@@ -109,10 +137,28 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-slate-950/95 border-b border-white/10 backdrop-blur-xl">
         <div class="pt-2 pb-3 space-y-1 px-4">
-            <a href="{{ route('dashboard') }}" 
-               class="block py-2 text-sm font-semibold transition {{ request()->routeIs('dashboard') ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">
+            <a href="{{ $dashboardRoute }}" 
+               class="block py-2 text-sm font-semibold transition {{ $isDashboardActive ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">
                 {{ __('Dashboard') }}
             </a>
+            @if($userRole === 'admin')
+                <a href="{{ route('admin.facilities.index') }}" 
+                   class="block py-2 text-sm font-semibold transition {{ request()->routeIs('admin.facilities.*') ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">
+                    {{ __('Kelola Fasilitas') }}
+                </a>
+                <a href="{{ route('admin.users.index') }}" 
+                   class="block py-2 text-sm font-semibold transition {{ request()->routeIs('admin.users.*') ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">
+                    {{ __('Kelola Pengguna') }}
+                </a>
+                <a href="{{ route('admin.reports.index') }}" 
+                   class="block py-2 text-sm font-semibold transition {{ request()->routeIs('admin.reports.*') ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">
+                    {{ __('Rekap & Laporan') }}
+                </a>
+                <a href="{{ route('facilities.index') }}" 
+                   class="block py-2 text-sm font-semibold transition {{ request()->routeIs('facilities.*') ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">
+                    {{ __('Daftar Fasilitas') }}
+                </a>
+            @endif
             @if($userRole === 'user')
                 <a href="{{ route('reservations.index') }}" 
                    class="block py-2 text-sm font-semibold transition {{ request()->routeIs('reservations.*') ? 'text-teal-400 font-bold' : 'text-slate-300 hover:text-white' }}">

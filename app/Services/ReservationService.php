@@ -8,6 +8,7 @@ use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\ReservationLog;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\ValidationException;
 
 class ReservationService
 {
@@ -96,12 +97,12 @@ class ReservationService
      * Setujui reservasi (pending → approved).
      * Cek facility active & anti-bentrok sebelum approve.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function approve(Reservation $reservation, int $actorId): void
     {
         if ($reservation->status !== ReservationStatus::PENDING) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'status' => 'Hanya reservasi berstatus menunggu yang dapat disetujui.',
             ]);
         }
@@ -109,7 +110,7 @@ class ReservationService
         $facility = $reservation->facility;
         $facilityError = $this->checkAvailableFacility($facility);
         if ($facilityError) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'facility' => $facilityError,
             ]);
         }
@@ -125,7 +126,7 @@ class ReservationService
         );
 
         if ($hasConflict) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'conflict' => 'Terjadi bentrok dengan reservasi lain yang sudah disetujui pada slot waktu yang sama.',
             ]);
         }
@@ -142,12 +143,12 @@ class ReservationService
     /**
      * Tolak reservasi (pending → rejected) dengan alasan wajib.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function reject(Reservation $reservation, string $reason, int $actorId): void
     {
         if ($reservation->status !== ReservationStatus::PENDING) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'status' => 'Hanya reservasi berstatus menunggu yang dapat ditolak.',
             ]);
         }
@@ -165,12 +166,12 @@ class ReservationService
     /**
      * Pembatalan darurat oleh petugas (approved → cancelled) dengan alasan wajib.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function cancelForced(Reservation $reservation, string $reason, int $actorId): void
     {
         if ($reservation->status !== ReservationStatus::APPROVED) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'status' => 'Pembatalan darurat hanya berlaku untuk reservasi yang sudah disetujui.',
             ]);
         }
