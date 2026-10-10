@@ -6,6 +6,7 @@ use App\Models\Facility;
 use App\Services\ReservationService;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Validator;
 
 class StoreReservationRequest extends FormRequest
@@ -80,7 +81,14 @@ class StoreReservationRequest extends FormRequest
                 $validator->errors()->add('start_time', $error);
             }
 
-            // 2. Validasi status fasilitas (harus active)
+            // 2. Validasi waktu reservasi tidak boleh sudah lewat
+            $timezone = config('app.timezone');
+            $startDateTime = Carbon::parse($this->reservation_date.' '.$this->start_time, $timezone);
+            if ($startDateTime->lessThanOrEqualTo(now($timezone))) {
+                $validator->errors()->add('start_time', 'Waktu mulai reservasi tidak boleh pada jam yang sudah lewat.');
+            }
+
+            // 3. Validasi status fasilitas (harus active)
             $facility = Facility::find($this->facility_id);
             if ($facility) {
                 $facilityError = $service->checkAvailableFacility($facility);
@@ -89,8 +97,8 @@ class StoreReservationRequest extends FormRequest
                 }
             }
 
-            // 3. Validasi bentrok dengan reservasi yang sudah disetujui
-            if ($facility && empty($timeSlotErrors)) {
+            // 4. Validasi bentrok dengan reservasi yang sudah disetujui
+            if ($facility && empty($timeSlotErrors) && $validator->errors()->isEmpty()) {
                 $hasConflict = $service->checkConflict(
                     (int) $this->facility_id,
                     $this->reservation_date,

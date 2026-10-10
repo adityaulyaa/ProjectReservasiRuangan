@@ -57,7 +57,7 @@
                     <div class="text-xs text-slate-400 mt-1 font-medium">Laporan Baru</div>
                 </div>
 
-                {{-- In Progress Reports --}}
+                {{-- In Progress + Under Repair Reports --}}
                 <div class="liquid-glass rounded-3xl border border-white/10 p-6 shadow-2xl hover:border-indigo-500/30 transition group">
                     <div class="flex items-center gap-3 mb-3">
                         <div class="w-11 h-11 rounded-2xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -66,8 +66,8 @@
                             </svg>
                         </div>
                     </div>
-                    <div class="text-3xl font-extrabold text-white">{{ $inProgressReports }}</div>
-                    <div class="text-xs text-slate-400 mt-1 font-medium">Laporan Diproses</div>
+                    <div class="text-3xl font-extrabold text-white">{{ $inProgressReports + $underRepairReports }}</div>
+                    <div class="text-xs text-slate-400 mt-1 font-medium">Laporan Ditangani</div>
                 </div>
             </div>
 

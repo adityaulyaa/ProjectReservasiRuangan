@@ -114,6 +114,8 @@ php artisan db:create
 php artisan migrate:fresh --seed
 ```
 
+Perintah ini membuat data demo lengkap: 1 admin, 2 petugas, 8 pengguna, 20 fasilitas, 22 reservasi, dan 10 laporan kerusakan.
+
 ### 6. Build Frontend Assets
 
 ```bash
@@ -227,6 +229,53 @@ Run PHP Linter (Pint):
 
 ```bash
 ./vendor/bin/pint
+```
+
+Validasi build frontend production:
+
+```bash
+npm run build
+```
+
+## Troubleshooting
+
+### MySQL tidak bisa terkoneksi
+
+Pastikan service MySQL berjalan dan konfigurasi `.env` sesuai:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=reservasi_ruangan
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Jika database belum ada, jalankan:
+
+```bash
+php artisan db:create
+php artisan migrate:fresh --seed
+```
+
+### Class atau package tidak ditemukan
+
+Jalankan ulang autoload dan discovery package:
+
+```bash
+composer install
+composer dump-autoload
+php artisan optimize:clear
+```
+
+### Asset CSS/JS tidak muncul
+
+Jalankan:
+
+```bash
+npm install
+npm run build
 ```
 
 ## Documentation

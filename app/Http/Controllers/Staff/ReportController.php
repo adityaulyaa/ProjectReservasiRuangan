@@ -18,17 +18,17 @@ class ReportController extends Controller
     ) {}
 
     /**
-     * Antrian laporan: new & in_progress, dengan filter status opsional.
+     * Antrian laporan: new & in_progress & under_repair, dengan filter status opsional.
      */
     public function queue(Request $request): View
     {
         $statusFilter = $request->query('status');
 
         $query = Report::with(['facility', 'user'])
-            ->whereIn('status', [ReportStatus::NEW->value, ReportStatus::IN_PROGRESS->value])
+            ->whereIn('status', [ReportStatus::NEW->value, ReportStatus::IN_PROGRESS->value, ReportStatus::UNDER_REPAIR->value])
             ->latest();
 
-        if ($statusFilter && in_array($statusFilter, [ReportStatus::NEW->value, ReportStatus::IN_PROGRESS->value], true)) {
+        if ($statusFilter && in_array($statusFilter, [ReportStatus::NEW->value, ReportStatus::IN_PROGRESS->value, ReportStatus::UNDER_REPAIR->value], true)) {
             $query->where('status', $statusFilter);
         }
 
@@ -80,16 +80,16 @@ class ReportController extends Controller
     }
 
     /**
-     * Tandai fasilitas terkait laporan berstatus maintenance.
+     * Tandai fasilitas terkait laporan berstatus maintenance dan ubah status laporan ke under_repair.
      */
     public function markMaintenance(int $id): RedirectResponse
     {
         $report = Report::findOrFail($id);
 
-        $this->reportService->markFacilityMaintenance($report->facility_id);
+        $this->reportService->markFacilityMaintenance($report, auth()->id());
 
         return redirect()->route('staff.reports.queue')
-            ->with('success', 'Fasilitas ditandai sedang dalam perbaikan.');
+            ->with('success', 'Fasilitas ditandai sedang dalam perbaikan dan status laporan diperbarui.');
     }
 
     /**

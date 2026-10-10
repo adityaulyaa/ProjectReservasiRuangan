@@ -9,11 +9,19 @@ use App\Models\Facility;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 class ReservationTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+
+        parent::tearDown();
+    }
 
     private function createFacility(array $attributes = []): Facility
     {
@@ -241,6 +249,127 @@ class ReservationTest extends TestCase
         ]);
 
         $response->assertSessionHasErrors('reservation_date');
+    }
+
+    public function test_reservation_rejected_if_today_start_time_already_passed(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-10 14:15:00'));
+
+        $user = User::factory()->create(['role' => Role::USER->value]);
+        $facility = $this->createFacility();
+
+        $response = $this->actingAs($user)->post(route('reservations.store'), [
+            'facility_id' => $facility->id,
+            'reservation_date' => now()->toDateString(),
+            'start_time' => '14:00',
+            'end_time' => '15:00',
+            'purpose' => 'Rapat Jam Lewat',
+        ]);
+
+        $response->assertSessionHasErrors('start_time');
+        $this->assertDatabaseMissing('reservations', [
+            'purpose' => 'Rapat Jam Lewat',
+        ]);
+
+        Carbon::setTestNow();
+    }
+
+    public function test_reservation_allowed_if_today_start_time_is_still_upcoming(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-10 14:15:00'));
+
+        $user = User::factory()->create(['role' => Role::USER->value]);
+        $facility = $this->createFacility();
+
+        $response = $this->actingAs($user)->post(route('reservations.store'), [
+            'facility_id' => $facility->id,
+            'reservation_date' => now()->toDateString(),
+            'start_time' => '14:30',
+            'end_time' => '15:00',
+            'purpose' => 'Rapat Jam Mendatang',
+        ]);
+
+        $response->assertRedirect(route('reservations.index'));
+        $this->assertDatabaseHas('reservations', [
+            'purpose' => 'Rapat Jam Mendatang',
+            'status' => ReservationStatus::PENDING->value,
+        ]);
+
+        Carbon::setTestNow();
+    }
+
+    public function test_reservation_tomorrow_allows_early_operational_slot(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-10 14:15:00'));
+
+        $user = User::factory()->create(['role' => Role::USER->value]);
+        $facility = $this->createFacility();
+
+        $response = $this->actingAs($user)->post(route('reservations.store'), [
+            'facility_id' => $facility->id,
+            'reservation_date' => now()->addDay()->toDateString(),
+            'start_time' => '07:00',
+            'end_time' => '07:30',
+            'purpose' => 'Rapat Besok Pagi',
+        ]);
+
+        $response->assertRedirect(route('reservations.index'));
+        $this->assertDatabaseHas('reservations', [
+            'purpose' => 'Rapat Besok Pagi',
+            'status' => ReservationStatus::PENDING->value,
+        ]);
+
+        Carbon::setTestNow();
+    }
+
+    public function test_reservation_create_page_defaults_to_next_available_slot_for_today(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-10 14:15:00'));
+
+        $user = User::factory()->create(['role' => Role::USER->value]);
+        $this->createFacility();
+
+        $response = $this->actingAs($user)->get(route('reservations.create'));
+
+        $response->assertStatus(200);
+        $response->assertViewHas('startTime', '14:30');
+        $response->assertViewHas('endTime', '15:00');
+
+        Carbon::setTestNow();
+    }
+
+    public function test_reservation_rejected_for_all_today_slots_after_operational_hours_in_jakarta(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 10, 10, 22, 0, 0, 'Asia/Jakarta'));
+
+        $user = User::factory()->create(['role' => Role::USER->value]);
+        $facility = $this->createFacility();
+
+        $response = $this->actingAs($user)->post(route('reservations.store'), [
+            'facility_id' => $facility->id,
+            'reservation_date' => '2026-10-10',
+            'start_time' => '15:30',
+            'end_time' => '19:30',
+            'purpose' => 'Reservasi Setelah Jam Operasional',
+        ]);
+
+        $response->assertSessionHasErrors('start_time');
+        $this->assertDatabaseMissing('reservations', [
+            'purpose' => 'Reservasi Setelah Jam Operasional',
+        ]);
+    }
+
+    public function test_reservation_create_page_has_no_available_start_slot_after_operational_hours_in_jakarta(): void
+    {
+        Carbon::setTestNow(Carbon::create(2026, 10, 10, 22, 0, 0, 'Asia/Jakarta'));
+
+        $user = User::factory()->create(['role' => Role::USER->value]);
+        $this->createFacility();
+
+        $response = $this->actingAs($user)->get(route('reservations.create'));
+
+        $response->assertStatus(200);
+        $response->assertViewHas('startTime', '07:00');
     }
 
     public function test_user_can_view_their_reservation_history_in_index(): void

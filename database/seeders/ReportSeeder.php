@@ -29,7 +29,7 @@ class ReportSeeder extends Seeder
                 'facility' => 'Ruang Kolaborasi Timur',
                 'category' => 'ac',
                 'description' => 'AC tidak dingin dan mengeluarkan suara berisik. Perlu segera diperbaiki karena mengganggu kegiatan.',
-                'status' => 'in_progress',
+                'status' => 'under_repair',
                 'resolution' => null,
                 'user_idx' => 0,
             ],
@@ -101,7 +101,7 @@ class ReportSeeder extends Seeder
                 'facility' => 'Lab Robotika',
                 'category' => 'lainnya',
                 'description' => 'Pintu masuk sulit dibuka dan sistem ventilasi kurang baik sehingga ruangan pengap.',
-                'status' => 'in_progress',
+                'status' => 'under_repair',
                 'resolution' => null,
                 'user_idx' => 4,
             ],
@@ -114,7 +114,7 @@ class ReportSeeder extends Seeder
             }
 
             $user = $users[$item['user_idx'] % $users->count()];
-            $processedBy = in_array($item['status'], ['in_progress', 'resolved', 'rejected']) ? $staff->id : null;
+            $processedBy = in_array($item['status'], ['in_progress', 'under_repair', 'resolved', 'rejected']) ? $staff->id : null;
 
             $report = Report::create([
                 'user_id' => $user->id,
@@ -140,16 +140,25 @@ class ReportSeeder extends Seeder
                 ReportLog::create([
                     'report_id' => $report->id,
                     'actor_id' => $staff->id,
-                    'action' => 'status_changed',
+                    'action' => 'in_progress',
                     'old_status' => 'new',
                     'new_status' => 'in_progress',
                     'note' => 'Laporan sedang ditangani',
+                ]);
+            } elseif ($item['status'] === 'under_repair') {
+                ReportLog::create([
+                    'report_id' => $report->id,
+                    'actor_id' => $staff->id,
+                    'action' => 'maintenance_marked',
+                    'old_status' => 'new',
+                    'new_status' => 'under_repair',
+                    'note' => 'Fasilitas ditandai sedang dalam perbaikan',
                 ]);
             } elseif ($item['status'] === 'resolved') {
                 ReportLog::create([
                     'report_id' => $report->id,
                     'actor_id' => $staff->id,
-                    'action' => 'status_changed',
+                    'action' => 'in_progress',
                     'old_status' => 'new',
                     'new_status' => 'in_progress',
                     'note' => 'Laporan sedang ditangani',

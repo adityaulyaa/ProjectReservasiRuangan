@@ -27,6 +27,10 @@
                    class="px-3 py-1.5 rounded-xl text-xs font-semibold border transition {{ $statusFilter === 'in_progress' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white' }}">
                     Diproses
                 </a>
+                <a href="{{ route('staff.reports.queue', ['status' => 'under_repair']) }}"
+                   class="px-3 py-1.5 rounded-xl text-xs font-semibold border transition {{ $statusFilter === 'under_repair' ? 'bg-orange-500/20 text-orange-300 border-orange-500/30' : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white' }}">
+                    Diperbaiki
+                </a>
             </div>
         </div>
     </x-slot>
@@ -67,13 +71,16 @@
                             $statusValue = is_object($report->status) ? $report->status->value : $report->status;
                             $isNew = $statusValue === 'new';
                             $isInProgress = $statusValue === 'in_progress';
+                            $isUnderRepair = $statusValue === 'under_repair';
                             $badgeClasses = [
                                 'new' => 'bg-rose-500/20 text-rose-300 border-rose-500/30',
                                 'in_progress' => 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+                                'under_repair' => 'bg-orange-500/20 text-orange-300 border-orange-500/30',
                             ][$statusValue] ?? 'bg-white/10 text-slate-300 border-white/20';
                             $badgeLabels = [
                                 'new' => 'Baru',
                                 'in_progress' => 'Sedang Diproses',
+                                'under_repair' => 'Sedang Diperbaiki',
                             ][$statusValue] ?? ucfirst($statusValue);
                         @endphp
                         <div class="liquid-glass rounded-3xl border border-white/10 p-5 sm:p-6 shadow-2xl transition hover:border-white/20">
@@ -142,19 +149,21 @@
                                     @endif
 
                                     {{-- Tandai Perbaikan --}}
-                                    <form method="POST" action="{{ route('staff.reports.markMaintenance', $report->id) }}">
-                                        @csrf
-                                        <button type="submit"
-                                                class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white/5 text-amber-300 border border-amber-500/30 hover:bg-amber-500/10 transition cursor-pointer">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            </svg>
-                                            Tandai Perbaikan
-                                        </button>
-                                    </form>
-
                                     @if($isNew || $isInProgress)
+                                        <form method="POST" action="{{ route('staff.reports.markMaintenance', $report->id) }}">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white shadow-lg shadow-orange-600/20 transition cursor-pointer">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                Tandai Perbaikan
+                                            </button>
+                                        </form>
+                                    @endif
+
+                                    @if($isNew || $isInProgress || $isUnderRepair)
                                         {{-- Selesai --}}
                                         <button type="button"
                                                 @click="resolveId = {{ $report->id }}; resolveName = '{{ addslashes($report->facility->name ?? 'Fasilitas') }}'"

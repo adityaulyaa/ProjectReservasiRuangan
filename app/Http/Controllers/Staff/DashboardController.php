@@ -14,6 +14,7 @@ class DashboardController extends Controller
         $approvedReservations = Reservation::where('status', 'approved')->count();
         $newReports = Report::where('status', 'new')->count();
         $inProgressReports = Report::where('status', 'in_progress')->count();
+        $underRepairReports = Report::where('status', 'under_repair')->count();
 
         $recentPendingReservations = Reservation::where('status', 'pending')
             ->with(['facility', 'user'])
@@ -22,7 +23,7 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $recentNewReports = Report::whereIn('status', ['new', 'in_progress'])
+        $recentNewReports = Report::whereIn('status', ['new', 'in_progress', 'under_repair'])
             ->with(['facility', 'user'])
             ->latest()
             ->take(5)
@@ -33,6 +34,7 @@ class DashboardController extends Controller
             'approvedReservations',
             'newReports',
             'inProgressReports',
+            'underRepairReports',
             'recentPendingReservations',
             'recentNewReports',
         ));

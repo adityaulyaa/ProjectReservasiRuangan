@@ -181,6 +181,25 @@ git merge main
 git status
 ```
 
+## Final Project Status
+
+Status validasi akhir SRS-21:
+
+- `php artisan test`: 168 tests passed
+- `./vendor/bin/pint --test`: passed
+- `npm run build`: passed
+- Seed demo: tersedia via `php artisan migrate:fresh --seed`
+- Export CSV/Excel/PDF: tervalidasi
+- Manual smoke checklist: public, auth, user, staff, admin, dashboard, dan export siap diuji
+
+Sebelum presentasi/demo, jalankan ulang:
+
+```bash
+php artisan migrate:fresh --seed
+php artisan test
+npm run build
+```
+
 ## Communication
 
 ### Daily Standup (Async di WhatsApp Group)

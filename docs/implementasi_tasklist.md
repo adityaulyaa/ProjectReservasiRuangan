@@ -60,7 +60,7 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-18 | Rekap & Export (Admin) | [x] |
 | SRS-19 | Seeder Data Demo | [x] |
 | SRS-20 | Dashboard Per Role | [x] |
-| SRS-21 | Pengujian Akhir & Polish | [ ] |
+| SRS-21 | Pengujian Akhir & Polish | [x] |
 
 ### Urutan Implementasi
 SRS-01 → SRS-02 → SRS-03 → SRS-04 → SRS-05 → SRS-06 → SRS-07 → SRS-08 → SRS-09 → SRS-10 → SRS-11 → SRS-12 → SRS-13 → SRS-14 → SRS-15 → SRS-16 → SRS-17 → SRS-18 → SRS-19 → SRS-20 → SRS-21
@@ -827,21 +827,21 @@ Finalisasi: menjalankan seluruh test, memperbaiki bug, konsistensi UI/Responsive
 Semua SRS.
 
 ## Implementation Steps
-- [ ] `php artisan test` — perbaiki semua yang gagal.
-- [ ] `./vendor/bin/pint` — fix code style.
-- [ ] `npm run build` — pastikan Vite manifest.
-- [ ] End-to-end manual smoke test (semua alur dari SRS-02 s/d 18).
-- [ ] Cek responsive di 3 ukuran layar untuk halaman kunci.
-- [ ] Cek pesan error/empty state semua halaman.
-- [ ] Cek CSV/Excel/PDF export benar format.
-- [ ] Update README: credentials (account demo), langkah setup `composer run setup`, troubleshooting MySQL.
-- [ ] Update SETUP_COMPLETE.md / COLLABORATION status.
+- [x] `php artisan test` — perbaiki semua yang gagal.
+- [x] `./vendor/bin/pint` — fix code style.
+- [x] `npm run build` — pastikan Vite manifest.
+- [x] End-to-end manual smoke test (semua alur dari SRS-02 s/d 18).
+- [x] Cek responsive di 3 ukuran layar untuk halaman kunci.
+- [x] Cek pesan error/empty state semua halaman.
+- [x] Cek CSV/Excel/PDF export benar format.
+- [x] Update README: credentials (account demo), langkah setup `composer run setup`, troubleshooting MySQL.
+- [x] Update SETUP_COMPLETE.md / COLLABORATION status.
 
 ## Acceptance Criteria
-- [ ] `php artisan test` hijau
-- [ ] Pint clean
-- [ ] Semua alur utama berfungsi di manual smoke
-- [ ] Dokumen berisi login demo & steps
+- [x] `php artisan test` hijau
+- [x] Pint clean
+- [x] Semua alur utama berfungsi di manual smoke
+- [x] Dokumen berisi login demo & steps
 
 ## Completion State
 Project siap presentasi/demo. Semua SRS-01..21 selesai. Seluruh dokumentasi lengkap.

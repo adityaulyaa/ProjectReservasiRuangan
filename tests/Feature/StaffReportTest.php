@@ -279,4 +279,95 @@ class StaffReportTest extends TestCase
         $facility->refresh();
         $this->assertEquals(FacilityStatus::ACTIVE->value, $facility->status->value);
     }
+
+    public function test_resolving_report_automatically_activates_facility_when_no_other_under_repair(): void
+    {
+        $staff = $this->createStaff();
+        $facility = $this->createFacility(['status' => FacilityStatus::MAINTENANCE->value]);
+        $report = $this->createReport([
+            'facility_id' => $facility->id,
+            'status' => ReportStatus::UNDER_REPAIR->value,
+        ]);
+
+        $response = $this->actingAs($staff)->post(route('staff.reports.updateStatus', $report->id), [
+            'status' => 'resolved',
+            'resolution_note' => 'Masalah telah diperbaiki',
+        ]);
+
+        $response->assertRedirect(route('staff.reports.queue'));
+        
+        $facility->refresh();
+        $this->assertEquals(FacilityStatus::ACTIVE->value, $facility->status->value);
+    }
+
+    public function test_resolving_report_keeps_facility_maintenance_when_other_under_repair_exists(): void
+    {
+        $staff = $this->createStaff();
+        $facility = $this->createFacility(['status' => FacilityStatus::MAINTENANCE->value]);
+        
+        // Report pertama - akan diselesaikan
+        $report1 = $this->createReport([
+            'facility_id' => $facility->id,
+            'status' => ReportStatus::UNDER_REPAIR->value,
+            'category' => 'ac',
+        ]);
+
+        // Report kedua - masih under_repair
+        $report2 = $this->createReport([
+            'facility_id' => $facility->id,
+            'status' => ReportStatus::UNDER_REPAIR->value,
+            'category' => 'listrik',
+        ]);
+
+        $response = $this->actingAs($staff)->post(route('staff.reports.updateStatus', $report1->id), [
+            'status' => 'resolved',
+            'resolution_note' => 'AC telah diperbaiki',
+        ]);
+
+        $response->assertRedirect(route('staff.reports.queue'));
+        
+        // Fasilitas harus tetap maintenance karena masih ada report2 yang under_repair
+        $facility->refresh();
+        $this->assertEquals(FacilityStatus::MAINTENANCE->value, $facility->status->value);
+    }
+
+    public function test_rejecting_report_automatically_activates_facility_when_no_other_under_repair(): void
+    {
+        $staff = $this->createStaff();
+        $facility = $this->createFacility(['status' => FacilityStatus::MAINTENANCE->value]);
+        $report = $this->createReport([
+            'facility_id' => $facility->id,
+            'status' => ReportStatus::UNDER_REPAIR->value,
+        ]);
+
+        $response = $this->actingAs($staff)->post(route('staff.reports.updateStatus', $report->id), [
+            'status' => 'rejected',
+            'resolution_note' => 'Laporan tidak valid, tidak ditemukan kerusakan',
+        ]);
+
+        $response->assertRedirect(route('staff.reports.queue'));
+        
+        $facility->refresh();
+        $this->assertEquals(FacilityStatus::ACTIVE->value, $facility->status->value);
+    }
+
+    public function test_in_progress_status_does_not_change_facility_status(): void
+    {
+        $staff = $this->createStaff();
+        $facility = $this->createFacility(['status' => FacilityStatus::ACTIVE->value]);
+        $report = $this->createReport([
+            'facility_id' => $facility->id,
+            'status' => ReportStatus::NEW->value,
+        ]);
+
+        $response = $this->actingAs($staff)->post(route('staff.reports.updateStatus', $report->id), [
+            'status' => 'in_progress',
+        ]);
+
+        $response->assertRedirect(route('staff.reports.queue'));
+        
+        // Fasilitas harus tetap active
+        $facility->refresh();
+        $this->assertEquals(FacilityStatus::ACTIVE->value, $facility->status->value);
+    }
 }

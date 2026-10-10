@@ -16,23 +16,40 @@
 
     <div class="py-10" x-data="{
         facilityId: '{{ old('facility_id', $facilityId ?? '') }}',
-        date: '{{ old('reservation_date', $date ?? now()->toDateString()) }}',
+        date: '{{ old('reservation_date', $date ?? now(config('app.timezone'))->toDateString()) }}',
         startTime: '{{ old('start_time', $startTime ?? '07:00') }}',
         endTime: '{{ old('end_time', $endTime ?? '07:30') }}',
         facilities: {{ json_encode($facilities->keyBy('id')->all()) }},
         allSlots: {{ json_encode($availableSlots) }},
+        today: '{{ now(config('app.timezone'))->toDateString() }}',
+        currentTime: '{{ now(config('app.timezone'))->format('H:i') }}',
         closeTime: '{{ config('reservation.close_time', '20:00') }}',
         slotMinutes: {{ (int) config('reservation.slot_minutes', 30) }},
 
         init() {
-            // Pastikan jika endTime <= startTime, langsung sesuaikan ke 1 slot
+            this.onDateChange();
+
             if (this.durationMinutes <= 0) {
                 this.setDurationSlots(1);
             }
         },
 
+        isPastSlot(slot) {
+            return this.date === this.today && slot <= this.currentTime;
+        },
+
+        onDateChange() {
+            if (this.isPastSlot(this.startTime)) {
+                const nextSlot = this.allSlots.find((slot) => !this.isPastSlot(slot));
+                this.startTime = nextSlot || '';
+            }
+
+            if (this.startTime) {
+                this.setDurationSlots(1);
+            }
+        },
+
         onStartTimeChange() {
-            // Ketika waktu mulai diubah, langsung set waktu selesai ke 1 slot (30 menit)
             this.setDurationSlots(1);
         },
 
@@ -195,7 +212,8 @@
                                 id="reservation_date" 
                                 name="reservation_date" 
                                 x-model="date"
-                                min="{{ now()->toDateString() }}"
+                                @change="onDateChange()"
+                                min="{{ now(config('app.timezone'))->toDateString() }}"
                                 class="w-full rounded-2xl border border-white/20 bg-white/5 px-4 py-3 text-sm text-white focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/20 transition cursor-pointer @error('reservation_date') border-rose-500 @enderror"
                                 required
                             >
@@ -221,12 +239,15 @@
                                         required
                                     >
                                         @foreach($availableSlots as $slot)
-                                            <option value="{{ $slot }}" class="text-gray-900 bg-white">{{ $slot }}</option>
+                                            <option value="{{ $slot }}" x-bind:disabled="isPastSlot('{{ $slot }}')" class="text-gray-900 bg-white">{{ $slot }}</option>
                                         @endforeach
                                     </select>
                                     @error('start_time')
                                         <p class="mt-1 text-xs text-rose-400">{{ $message }}</p>
                                     @enderror
+                                    <p x-show="date === today && allSlots.every((slot) => isPastSlot(slot))" class="mt-1 text-xs text-amber-300">
+                                        Tidak ada slot tersisa untuk hari ini. Silakan pilih tanggal lain.
+                                    </p>
                                 </div>
 
                                 <!-- End Time -->
@@ -316,7 +337,7 @@
                         <div class="pt-4 flex items-center gap-4">
                             <button 
                                 type="submit" 
-                                :disabled="!isValidTime"
+                                :disabled="!startTime || !isValidTime"
                                 class="px-7 py-3 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold shadow-lg shadow-teal-500/20 transition cursor-pointer"
                             >
                                 Kirim Pengajuan Reservasi
