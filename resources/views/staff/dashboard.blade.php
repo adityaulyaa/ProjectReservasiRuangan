@@ -105,6 +105,113 @@
                     </svg>
                 </a>
             </div>
+
+            {{-- Recent Pending Reservations Preview --}}
+            <div class="liquid-glass rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
+                <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                    <h3 class="font-bold text-base text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        Reservasi Pending Terbaru
+                    </h3>
+                    <a href="{{ route('staff.reservations.queue', ['status' => 'pending']) }}" class="text-xs font-semibold text-teal-300 hover:text-teal-200 transition">
+                        Lihat Semua →
+                    </a>
+                </div>
+
+                @if($recentPendingReservations->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-black/20 text-xs font-semibold uppercase text-slate-400 tracking-wider border-b border-white/10">
+                                    <th class="py-3 px-4">Pemohon</th>
+                                    <th class="py-3 px-4">Fasilitas</th>
+                                    <th class="py-3 px-4">Tanggal & Waktu</th>
+                                    <th class="py-3 px-4 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5 text-slate-300">
+                                @foreach($recentPendingReservations as $res)
+                                    <tr class="hover:bg-white/5 transition">
+                                        <td class="py-3 px-4 font-medium text-white">{{ $res->user->name }}</td>
+                                        <td class="py-3 px-4 text-xs">{{ $res->facility->name }}</td>
+                                        <td class="py-3 px-4 text-xs whitespace-nowrap">
+                                            {{ \Illuminate\Support\Carbon::parse($res->reservation_date)->locale('id')->translatedFormat('d M') }} • {{ substr($res->start_time, 0, 5) }}-{{ substr($res->end_time, 0, 5) }}
+                                        </td>
+                                        <td class="py-3 px-4 text-right">
+                                            <a href="{{ route('staff.reservations.queue') }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-teal-500/20 text-teal-300 text-xs font-semibold hover:bg-teal-500/30 transition">
+                                                Proses
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="py-8 text-center text-slate-400 text-sm">Tidak ada reservasi pending</div>
+                @endif
+            </div>
+
+            {{-- Recent Reports Preview --}}
+            <div class="liquid-glass rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
+                <div class="p-6 border-b border-white/10 flex items-center justify-between">
+                    <h3 class="font-bold text-base text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        Laporan Kerusakan Terbaru
+                    </h3>
+                    <a href="{{ route('staff.reports.queue') }}" class="text-xs font-semibold text-rose-300 hover:text-rose-200 transition">
+                        Lihat Semua →
+                    </a>
+                </div>
+
+                @if($recentNewReports->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-black/20 text-xs font-semibold uppercase text-slate-400 tracking-wider border-b border-white/10">
+                                    <th class="py-3 px-4">Pelapor</th>
+                                    <th class="py-3 px-4">Fasilitas</th>
+                                    <th class="py-3 px-4">Kategori</th>
+                                    <th class="py-3 px-4">Status</th>
+                                    <th class="py-3 px-4 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5 text-slate-300">
+                                @foreach($recentNewReports as $report)
+                                    @php
+                                        $statusValue = is_object($report->status) ? $report->status->value : $report->status;
+                                        $badgeClasses = [
+                                            'new' => 'bg-blue-500/20 text-blue-300',
+                                            'in_progress' => 'bg-yellow-500/20 text-yellow-300',
+                                        ][$statusValue] ?? 'bg-slate-500/20 text-slate-300';
+                                    @endphp
+                                    <tr class="hover:bg-white/5 transition">
+                                        <td class="py-3 px-4 font-medium text-white text-xs">{{ $report->user->name }}</td>
+                                        <td class="py-3 px-4 text-xs">{{ $report->facility->name }}</td>
+                                        <td class="py-3 px-4 text-xs capitalize">{{ $report->category }}</td>
+                                        <td class="py-3 px-4">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold {{ $badgeClasses }}">
+                                                {{ ucfirst($statusValue) }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4 text-right">
+                                            <a href="{{ route('staff.reports.queue') }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 text-xs font-semibold hover:bg-rose-500/30 transition">
+                                                Proses
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="py-8 text-center text-slate-400 text-sm">Tidak ada laporan yang perlu ditangani</div>
+                @endif
+            </div>
         </div>
     </div>
 </x-app-layout>

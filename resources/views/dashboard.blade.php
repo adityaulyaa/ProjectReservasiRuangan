@@ -24,7 +24,7 @@
     <div class="py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
-            {{-- Stat Cards --}}
+            {{-- Stat Cards Reservasi --}}
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {{-- Total Reservasi --}}
                 <div class="liquid-glass rounded-3xl p-6 border border-white/10 shadow-xl flex items-center justify-between">
@@ -62,6 +62,51 @@
                         <span class="text-[11px] text-emerald-200/60 block mt-1">Jadwal telah terkunci</span>
                     </div>
                     <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shadow-inner">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Stat Cards Laporan --}}
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {{-- Total Laporan --}}
+                <div class="liquid-glass rounded-3xl p-6 border border-white/10 shadow-xl flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">Total Laporan</span>
+                        <span class="text-3xl font-extrabold text-white">{{ $stats['total_reports'] ?? 0 }}</span>
+                        <span class="text-[11px] text-slate-400 block mt-1">Keseluruhan laporan kerusakan</span>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center shadow-inner">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                </div>
+
+                {{-- Laporan Diproses --}}
+                <div class="liquid-glass rounded-3xl p-6 border border-white/10 shadow-xl flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-indigo-300/80 block mb-1">Sedang Diproses</span>
+                        <span class="text-3xl font-extrabold text-indigo-300">{{ $stats['in_progress_reports'] ?? 0 }}</span>
+                        <span class="text-[11px] text-indigo-200/60 block mt-1">Dalam penanganan</span>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 flex items-center justify-center shadow-inner">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                </div>
+
+                {{-- Laporan Selesai --}}
+                <div class="liquid-glass rounded-3xl p-6 border border-white/10 shadow-xl flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-teal-300/80 block mb-1">Selesai</span>
+                        <span class="text-3xl font-extrabold text-teal-400">{{ $stats['resolved_reports'] ?? 0 }}</span>
+                        <span class="text-[11px] text-teal-200/60 block mt-1">Sudah ditangani</span>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-teal-500/15 border border-teal-500/30 text-teal-400 flex items-center justify-center shadow-inner">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>

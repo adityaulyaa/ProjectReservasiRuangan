@@ -94,6 +94,82 @@
                 </div>
             </div>
 
+            {{-- Breakdown Reservasi & Laporan --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="liquid-glass rounded-3xl border border-white/10 p-6 shadow-2xl">
+                    <h3 class="font-bold text-lg text-white flex items-center gap-2 mb-4">
+                        <span class="w-2 h-5 rounded-full bg-indigo-400"></span>
+                        Ringkasan Reservasi
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                            <div class="text-2xl font-extrabold text-white">{{ $stats['reservations_today'] }}</div>
+                            <div class="text-xs text-slate-400 mt-1">Reservasi Hari Ini</div>
+                        </div>
+                        <div class="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4">
+                            <div class="text-2xl font-extrabold text-amber-300">{{ $stats['pending_reservations'] }}</div>
+                            <div class="text-xs text-amber-200/70 mt-1">Pending</div>
+                        </div>
+                        <div class="rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-4">
+                            <div class="text-2xl font-extrabold text-emerald-300">{{ $stats['approved_reservations'] }}</div>
+                            <div class="text-xs text-emerald-200/70 mt-1">Approved</div>
+                        </div>
+                        <div class="rounded-2xl bg-slate-500/10 border border-slate-500/20 p-4">
+                            <div class="text-2xl font-extrabold text-slate-300">{{ $stats['cancelled_reservations'] + $stats['rejected_reservations'] }}</div>
+                            <div class="text-xs text-slate-400 mt-1">Rejected / Cancelled</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="liquid-glass rounded-3xl border border-white/10 p-6 shadow-2xl">
+                    <h3 class="font-bold text-lg text-white flex items-center gap-2 mb-4">
+                        <span class="w-2 h-5 rounded-full bg-rose-400"></span>
+                        Ringkasan Laporan
+                    </h3>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="rounded-2xl bg-blue-500/10 border border-blue-500/20 p-4">
+                            <div class="text-2xl font-extrabold text-blue-300">{{ $stats['new_reports'] }}</div>
+                            <div class="text-xs text-blue-200/70 mt-1">Baru</div>
+                        </div>
+                        <div class="rounded-2xl bg-yellow-500/10 border border-yellow-500/20 p-4">
+                            <div class="text-2xl font-extrabold text-yellow-300">{{ $stats['in_progress_reports'] }}</div>
+                            <div class="text-xs text-yellow-200/70 mt-1">Diproses</div>
+                        </div>
+                        <div class="rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-4">
+                            <div class="text-2xl font-extrabold text-emerald-300">{{ $stats['resolved_reports'] }}</div>
+                            <div class="text-xs text-emerald-200/70 mt-1">Selesai</div>
+                        </div>
+                        <div class="rounded-2xl bg-rose-500/10 border border-rose-500/20 p-4">
+                            <div class="text-2xl font-extrabold text-rose-300">{{ $stats['rejected_reports'] }}</div>
+                            <div class="text-xs text-rose-200/70 mt-1">Ditolak</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Top Facilities --}}
+            <div class="liquid-glass rounded-3xl border border-white/10 p-6 shadow-2xl">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-lg text-white flex items-center gap-2">
+                        <span class="w-2 h-5 rounded-full bg-emerald-400"></span>
+                        Top Fasilitas Berdasarkan Reservasi Disetujui
+                    </h3>
+                    <a href="{{ route('admin.reports.index') }}" class="text-xs font-semibold text-emerald-300 hover:text-emerald-200">Lihat Rekap →</a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                    @forelse($topFacilities as $facility)
+                        <div class="rounded-2xl bg-white/5 border border-white/10 p-4">
+                            <div class="text-xs text-slate-400 truncate">{{ $facility->type }}</div>
+                            <div class="text-sm font-bold text-white mt-1 truncate">{{ $facility->name }}</div>
+                            <div class="text-2xl font-extrabold text-emerald-300 mt-3">{{ $facility->reservations_count }}</div>
+                            <div class="text-xs text-slate-400">reservasi approved</div>
+                        </div>
+                    @empty
+                        <div class="md:col-span-5 py-8 text-center text-slate-400 text-sm">Belum ada data reservasi approved.</div>
+                    @endforelse
+                </div>
+            </div>
+
             {{-- Quick Navigation / Action Row --}}
             <div class="liquid-glass rounded-3xl border border-white/10 p-6 shadow-2xl">
                 <div class="flex items-center justify-between mb-4">

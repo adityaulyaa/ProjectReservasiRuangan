@@ -59,7 +59,7 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-17 | Kelola Pengguna (Admin) | [x] |
 | SRS-18 | Rekap & Export (Admin) | [x] |
 | SRS-19 | Seeder Data Demo | [x] |
-| SRS-20 | Dashboard Per Role | [ ] |
+| SRS-20 | Dashboard Per Role | [x] |
 | SRS-21 | Pengujian Akhir & Polish | [ ] |
 
 ### Urutan Implementasi
@@ -809,9 +809,9 @@ Menyediakan halaman dashboard informatif sesuai role (user/staff/admin) — ring
 SRS-06..18, SRS-05.
 
 ## Implementation Steps
-- [ ] **User Dashboard**: stat reservations per status milik user + laporan per status; list 5 terbaru + shortcuts. `views/user/dashboard.blade.php`.
-- [ ] **Staff Dashboard**: count reservasi pending + laporan new/in_progress; link langsung ke queue. `views/staff/dashboard.blade.php`.
-- [ ] **Admin Dashboard**: totals facilities, users, reservations today, reports (per status), top facilities; quick links ke admin pages. `views/admin/dashboard.blade.php`.
+- [x] **User Dashboard**: stat reservations per status milik user + laporan per status; list 5 terbaru + shortcuts. `resources/views/dashboard.blade.php`.
+- [x] **Staff Dashboard**: count reservasi pending + laporan new/in_progress; preview queue + link langsung ke queue. `resources/views/staff/dashboard.blade.php`.
+- [x] **Admin Dashboard**: totals facilities, users, reservations today, reports (per status), top facilities; quick links ke admin pages. `resources/views/admin/dashboard.blade.php`. `views/admin/dashboard.blade.php`.
 
 ## Completion State
 Dashboard lengkap; SRS-21 polish.
