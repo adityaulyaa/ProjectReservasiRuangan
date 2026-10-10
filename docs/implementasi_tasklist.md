@@ -58,7 +58,7 @@ Dokumen ini adalah panduan implementasi lengkap untuk proyek Sistem Reservasi & 
 | SRS-16 | Kelola Fasilitas (Admin CRUD) | [x] |
 | SRS-17 | Kelola Pengguna (Admin) | [x] |
 | SRS-18 | Rekap & Export (Admin) | [x] |
-| SRS-19 | Seeder Data Demo | [ ] |
+| SRS-19 | Seeder Data Demo | [x] |
 | SRS-20 | Dashboard Per Role | [ ] |
 | SRS-21 | Pengujian Akhir & Polish | [ ] |
 
@@ -784,16 +784,16 @@ Menyediakan data demo realistis sehingga aplikasi dan presentasi memiliki data l
 SRS-01..18.
 
 ## Implementation Steps
-- [ ] `UserSeeder`: 1 admin (admin@kampus.ac.id, role admin, is_verified=true), 2 staff, 8 user (3 di antaranya is_verified=false).
-- [ ] `FacilitySeeder`: 10 fasilitas bervariasi (Ruang 101, Lab Komputer RPL, dll).
-- [ ] `ReservationSeeder`: ±20 reservasi (pending, approved, rejected, cancelled; tanpa approved bentrok).
-- [ ] `ReportSeeder`: ±10 reports kategori bervariasi.
-- [ ] `DatabaseSeeder` panggil: UserSeeder → FacilitySeeder → ReservationSeeder → ReportSeeder.
-- [ ] Catat credentials demo di README.
+- [x] `UserSeeder`: 1 admin (admin@kampus.ac.id, role admin, is_verified=true), 2 staff, 8 user (3 di antaranya is_verified=false).
+- [x] `FacilitySeeder`: 20 fasilitas bervariasi, mencakup status active dan maintenance.
+- [x] `ReservationSeeder`: 22 reservasi (pending, approved, rejected, cancelled; tanpa approved bentrok), dengan reservation logs.
+- [x] `ReportSeeder`: 10 reports dengan kategori dan status bervariasi, serta report logs.
+- [x] `DatabaseSeeder` panggil: UserSeeder → FacilitySeeder → ReservationSeeder → ReportSeeder.
+- [x] Catat credentials demo di README.
 
 ## Acceptance Criteria
-- [ ] `php artisan migrate:fresh --seed` menghasilkan data
-- [ ] Semua role bisa login (akun verified)
+- [x] `php artisan migrate:fresh --seed` menghasilkan data
+- [x] Semua role bisa login (akun verified)
 
 ## Completion State
 Data demo siap; SRS-20 dashboard.

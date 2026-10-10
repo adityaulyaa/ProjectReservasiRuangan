@@ -179,6 +179,26 @@ ProjectReservasi/
 | Petugas | /staff | Proses reservasi & laporan, update status fasilitas |
 | Admin | /admin | Manage fasilitas, user, export rekap |
 
+## Akun Demo
+
+Semua akun demo menggunakan password `password123`.
+
+| Role | Email | Status |
+|------|-------|--------|
+| Admin | `admin@kampus.ac.id` | Terverifikasi |
+| Petugas | `staff1@kampus.ac.id` | Terverifikasi |
+| Petugas | `staff2@kampus.ac.id` | Terverifikasi |
+| Pengguna | `ahmad.fauzi@student.ac.id` | Terverifikasi |
+| Pengguna | `siti.nurhaliza@student.ac.id` | Terverifikasi |
+| Pengguna | `budi.santoso@student.ac.id` | Terverifikasi |
+| Pengguna | `dewi.lestari@student.ac.id` | Terverifikasi |
+| Pengguna | `eko.prasetyo@lecturer.ac.id` | Terverifikasi |
+| Pengguna | `rina.wati@student.ac.id` | Menunggu verifikasi |
+| Pengguna | `joko.widodo@student.ac.id` | Menunggu verifikasi |
+| Pengguna | `kartika.sari@student.ac.id` | Menunggu verifikasi |
+
+Gunakan akun terverifikasi untuk login dan demonstrasi fitur masing-masing role. Tiga akun pengguna terakhir sengaja dibuat belum terverifikasi untuk mendemonstrasikan alur verifikasi admin.
+
 ## Jam Operasional
 
 - **Hours**: 07.00 - 20.00 WIB

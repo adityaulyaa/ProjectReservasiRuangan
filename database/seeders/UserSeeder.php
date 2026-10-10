@@ -10,29 +10,35 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin Kampus',
-            'email' => 'admin@kampus.ac.id',
-            'password' => Hash::make('password123'),
-            'role' => 'admin',
-            'is_verified' => true,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@kampus.ac.id'],
+            [
+                'name' => 'Admin Kampus',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+                'is_verified' => true,
+            ]
+        );
 
-        User::create([
-            'name' => 'Staff Fasilitas 1',
-            'email' => 'staff1@kampus.ac.id',
-            'password' => Hash::make('password123'),
-            'role' => 'staff',
-            'is_verified' => true,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'staff1@kampus.ac.id'],
+            [
+                'name' => 'Staff Fasilitas 1',
+                'password' => Hash::make('password123'),
+                'role' => 'staff',
+                'is_verified' => true,
+            ]
+        );
 
-        User::create([
-            'name' => 'Staff Fasilitas 2',
-            'email' => 'staff2@kampus.ac.id',
-            'password' => Hash::make('password123'),
-            'role' => 'staff',
-            'is_verified' => true,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'staff2@kampus.ac.id'],
+            [
+                'name' => 'Staff Fasilitas 2',
+                'password' => Hash::make('password123'),
+                'role' => 'staff',
+                'is_verified' => true,
+            ]
+        );
 
         $verifiedUsers = [
             ['name' => 'Ahmad Fauzi', 'email' => 'ahmad.fauzi@student.ac.id'],
@@ -43,13 +49,15 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($verifiedUsers as $userData) {
-            User::create([
-                'name' => $userData['name'],
-                'email' => $userData['email'],
-                'password' => Hash::make('password123'),
-                'role' => 'user',
-                'is_verified' => true,
-            ]);
+            User::firstOrCreate(
+                ['email' => $userData['email']],
+                [
+                    'name' => $userData['name'],
+                    'password' => Hash::make('password123'),
+                    'role' => 'user',
+                    'is_verified' => true,
+                ]
+            );
         }
 
         $unverifiedUsers = [
@@ -59,13 +67,15 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($unverifiedUsers as $userData) {
-            User::create([
-                'name' => $userData['name'],
-                'email' => $userData['email'],
-                'password' => Hash::make('password123'),
-                'role' => 'user',
-                'is_verified' => false,
-            ]);
+            User::firstOrCreate(
+                ['email' => $userData['email']],
+                [
+                    'name' => $userData['name'],
+                    'password' => Hash::make('password123'),
+                    'role' => 'user',
+                    'is_verified' => false,
+                ]
+            );
         }
     }
 }
