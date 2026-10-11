@@ -55,34 +55,20 @@ class ReservationController extends Controller
 
         $startTime = $request->query('start_time');
         $endTime = $request->query('end_time');
-        $selectedSlots = [];
 
-        // Slot yang dipilih user di kalender (format: "08:00,08:30"). Nilai ini
-        // harus dipertahankan apa adanya, tidak boleh ditimpa dengan default.
+        // Jika parameter slots dikirim dari availability page (format: "08:00,08:30,09:00")
         if ($request->filled('slots')) {
-            $slotsArray = array_values(array_filter(
-                array_map('trim', explode(',', (string) $request->query('slots'))),
-                fn (string $slot): bool => $slot !== ''
-            ));
+            $slotsArray = explode(',', (string) $request->query('slots'));
             sort($slotsArray);
             if (! empty($slotsArray)) {
-                $selectedSlots = $slotsArray;
                 $startTime = $slotsArray[0];
                 $lastSlot = end($slotsArray);
                 $endTime = Carbon::parse($lastSlot)->addMinutes($slotMinutes)->format('H:i');
             }
         }
 
-        $hasExplicitSelection = ! empty($selectedSlots);
-
         $startTime = $startTime ?? $defaultStart;
         $endTime = $endTime ?? $defaultEnd;
-
-        // Slot yang sudah ditempati reservasi approved pada tanggal terpilih,
-        // agar halaman pengajuan dapat menandai dan memvalidasi ketersediaan.
-        $bookedSlots = $facilityId
-            ? $this->reservationService->occupiedSlotsForDate((int) $facilityId, $date)
-            : [];
 
         return view('user.reservations.create', compact(
             'facilities',
@@ -90,10 +76,7 @@ class ReservationController extends Controller
             'date',
             'startTime',
             'endTime',
-            'availableSlots',
-            'selectedSlots',
-            'hasExplicitSelection',
-            'bookedSlots'
+            'availableSlots'
         ));
     }
 

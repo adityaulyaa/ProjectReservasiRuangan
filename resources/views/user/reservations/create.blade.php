@@ -19,22 +19,14 @@
         date: '{{ old('reservation_date', $date ?? now(config('app.timezone'))->toDateString()) }}',
         startTime: '{{ old('start_time', $startTime ?? '07:00') }}',
         endTime: '{{ old('end_time', $endTime ?? '07:30') }}',
-        hasExplicitSelection: {{ $hasExplicitSelection ? 'true' : 'false' }},
         facilities: {{ json_encode($facilities->keyBy('id')->all()) }},
         allSlots: {{ json_encode($availableSlots) }},
-        bookedSlots: {{ json_encode($bookedSlots ?? []) }},
         today: '{{ now(config('app.timezone'))->toDateString() }}',
         currentTime: '{{ now(config('app.timezone'))->format('H:i') }}',
         closeTime: '{{ config('reservation.close_time', '20:00') }}',
         slotMinutes: {{ (int) config('reservation.slot_minutes', 30) }},
 
         init() {
-            // Jika user memilih slot di kalender, pertahankan pilihan tersebut.
-            // Jangan menimpanya dengan waktu default atau state lain.
-            if (this.hasExplicitSelection) {
-                return;
-            }
-
             this.onDateChange();
 
             if (this.durationMinutes <= 0) {
@@ -46,33 +38,7 @@
             return this.date === this.today && slot <= this.currentTime;
         },
 
-        isSlotBooked(slot) {
-            return this.bookedSlots.includes(slot);
-        },
-
-        isSlotUnavailable(slot) {
-            return this.isPastSlot(slot) || this.isSlotBooked(slot);
-        },
-
-        coveredSlots(start, end) {
-            const [sh, sm] = start.split(':').map(Number);
-            const [eh, em] = end.split(':').map(Number);
-            let cur = sh * 60 + sm;
-            const stop = eh * 60 + em;
-            const out = [];
-            while (cur < stop) {
-                const h = String(Math.floor(cur / 60)).padStart(2, '0');
-                const m = String(cur % 60).padStart(2, '0');
-                out.push(`${h}:${m}`);
-                cur += this.slotMinutes;
-            }
-            return out;
-        },
-
         onDateChange() {
-            // User mengganti tanggal secara manual: pilihan eksplisit tidak berlaku lagi.
-            this.hasExplicitSelection = false;
-
             if (this.isPastSlot(this.startTime)) {
                 const nextSlot = this.allSlots.find((slot) => !this.isPastSlot(slot));
                 this.startTime = nextSlot || '';
@@ -99,21 +65,6 @@
             const eh = String(Math.floor(cappedMins / 60)).padStart(2, '0');
             const em = String(cappedMins % 60).padStart(2, '0');
             this.endTime = `${eh}:${em}`;
-        },
-
-        get selectionIssue() {
-            if (!this.startTime || !this.endTime) return '';
-            const slots = this.coveredSlots(this.startTime, this.endTime);
-
-            if (slots.some((s) => this.isSlotBooked(s))) {
-                return 'Slot yang Anda pilih sudah tidak tersedia (terisi reservasi lain). Silakan pilih slot lain.';
-            }
-
-            if (this.date === this.today && slots.some((s) => this.isPastSlot(s))) {
-                return 'Sebagian atau seluruh slot yang Anda pilih sudah lewat untuk hari ini. Silakan pilih slot lain atau ganti tanggal.';
-            }
-
-            return '';
         },
 
         get availableEndTimes() {
@@ -288,7 +239,7 @@
                                         required
                                     >
                                         @foreach($availableSlots as $slot)
-                                            <option value="{{ $slot }}" x-bind:disabled="isSlotUnavailable('{{ $slot }}')" class="text-gray-900 bg-white">{{ $slot }}</option>
+                                            <option value="{{ $slot }}" x-bind:disabled="isPastSlot('{{ $slot }}')" class="text-gray-900 bg-white">{{ $slot }}</option>
                                         @endforeach
                                     </select>
                                     @error('start_time')
@@ -359,14 +310,6 @@
                             <span>Waktu selesai harus lebih besar daripada waktu mulai (minimal 1 slot 30 menit).</span>
                         </div>
 
-                        <!-- Slot Availability Warning -->
-                        <div x-show="selectionIssue" x-cloak class="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-xs text-rose-300 flex items-start gap-2">
-                            <svg class="w-4 h-4 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <span x-text="selectionIssue"></span>
-                        </div>
-
                         <!-- Purpose / Tujuan Penggunaan -->
                         <div>
                             <label for="purpose" class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
@@ -394,7 +337,7 @@
                         <div class="pt-4 flex items-center gap-4">
                             <button 
                                 type="submit" 
-                                :disabled="!startTime || !isValidTime || !!selectionIssue"
+                                :disabled="!startTime || !isValidTime"
                                 class="px-7 py-3 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold shadow-lg shadow-teal-500/20 transition cursor-pointer"
                             >
                                 Kirim Pengajuan Reservasi

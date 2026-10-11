@@ -13,46 +13,6 @@ use Illuminate\Validation\ValidationException;
 class ReservationService
 {
     /**
-     * Daftar slot (start "H:i") yang sudah ditempati reservasi approved pada
-     * tanggal & fasilitas tertentu. Dipakai halaman pengajuan untuk menandai
-     * slot yang tidak lagi tersedia.
-     *
-     * @return array<int, string>
-     */
-    public function occupiedSlotsForDate(int $facilityId, string $date): array
-    {
-        $slotMinutes = (int) config('reservation.slot_minutes', 30);
-
-        $approvedReservations = Reservation::where('facility_id', $facilityId)
-            ->where('reservation_date', $date)
-            ->where('status', ReservationStatus::APPROVED->value)
-            ->get(['start_time', 'end_time']);
-
-        if ($approvedReservations->isEmpty()) {
-            return [];
-        }
-
-        $occupied = [];
-
-        foreach ($this->slotsForDate() as $slot) {
-            $slotStart = Carbon::parse($slot)->format('H:i:s');
-            $slotEnd = Carbon::parse($slot)->addMinutes($slotMinutes)->format('H:i:s');
-
-            foreach ($approvedReservations as $res) {
-                $resStart = Carbon::parse($res->start_time)->format('H:i:s');
-                $resEnd = Carbon::parse($res->end_time)->format('H:i:s');
-
-                if ($resStart < $slotEnd && $resEnd > $slotStart) {
-                    $occupied[] = $slot;
-                    break;
-                }
-            }
-        }
-
-        return $occupied;
-    }
-
-    /**
      * Cek apakah ada bentrok dengan reservasi approved lain.
      */
     public function checkConflict(int $facilityId, string $date, string $start, string $end, ?int $excludeId = null): bool
