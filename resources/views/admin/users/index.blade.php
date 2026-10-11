@@ -44,7 +44,7 @@
             @endif
 
             {{-- Stat Cards --}}
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 <a href="{{ route('admin.users.index') }}" class="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-teal-500/40 transition">
                     <div class="text-xs text-slate-400 font-medium">Total Akun</div>
                     <div class="text-2xl font-bold text-white mt-1">{{ $stats['total'] }}</div>
@@ -59,6 +59,12 @@
                     </div>
                     <div class="text-2xl font-bold text-amber-300 mt-1">{{ $stats['unverified'] }}</div>
                     <div class="text-[11px] text-amber-200/60 mt-0.5">Registrasi mandiri</div>
+                </a>
+
+                <a href="{{ route('admin.users.index', ['status' => 'rejected']) }}" class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 hover:border-rose-500/50 transition">
+                    <div class="text-xs text-rose-300 font-medium">Ditolak</div>
+                    <div class="text-2xl font-bold text-rose-300 mt-1">{{ $stats['rejected'] }}</div>
+                    <div class="text-[11px] text-rose-200/60 mt-0.5">Dapat dipulihkan</div>
                 </a>
 
                 <a href="{{ route('admin.users.index', ['role' => 'staff']) }}" class="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 hover:border-teal-500/40 transition">
@@ -100,6 +106,7 @@
                             <option value="">Semua Status</option>
                             <option value="unverified" {{ ($statusFilter ?? '') === 'unverified' ? 'selected' : '' }}>Menunggu Verifikasi</option>
                             <option value="verified" {{ ($statusFilter ?? '') === 'verified' ? 'selected' : '' }}>Terverifikasi (Aktif)</option>
+                            <option value="rejected" {{ ($statusFilter ?? '') === 'rejected' ? 'selected' : '' }}>Ditolak</option>
                         </select>
 
                         <button type="submit" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-sm font-semibold text-white transition cursor-pointer">
@@ -141,8 +148,10 @@
                                             default => 'bg-slate-500/20 text-slate-300 border-slate-500/30',
                                         };
                                         $roleLabel = is_object($user->role) ? $user->role->label() : ucfirst($user->role);
+                                        $isVerified = $user->isVerified();
+                                        $isRejected = $user->isRejected();
                                     @endphp
-                                    <tr class="hover:bg-white/[0.02] transition {{ ! $user->is_verified ? 'bg-amber-500/[0.03]' : '' }}">
+                                    <tr class="hover:bg-white/[0.02] transition {{ $isRejected ? 'bg-rose-500/[0.03]' : (! $isVerified ? 'bg-amber-500/[0.03]' : '') }}">
                                         {{-- Name & Avatar --}}
                                         <td class="py-4 px-6">
                                             <div class="flex items-center gap-3">
@@ -172,12 +181,19 @@
 
                                         {{-- Verification Status --}}
                                         <td class="py-4 px-6">
-                                            @if($user->is_verified)
+                                            @if($isVerified)
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                                                     <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                                     </svg>
                                                     Terverifikasi
+                                                </span>
+                                            @elseif($isRejected)
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                                                    <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                    Ditolak
                                                 </span>
                                             @else
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
@@ -197,8 +213,35 @@
                                         {{-- Action Buttons --}}
                                         <td class="py-4 px-6 text-right">
                                             <div class="inline-flex items-center gap-2">
-                                                {{-- Tombol Verifikasi / Tolak jika unverified --}}
-                                                @if(! $user->is_verified)
+                                                @if($isVerified)
+                                                    {{-- Jika sudah terverifikasi dan bukan akun admin sendiri, sediakan opsi tangguhkan --}}
+                                                    @if(Auth::id() !== $user->id && $roleVal !== 'admin')
+                                                        <form action="{{ route('admin.users.reject', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Tangguhkan akses untuk akun {{ addslashes($user->name) }}? Pengguna tidak akan dapat login sampai diverifikasi kembali.');">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                    title="Tangguhkan Akses"
+                                                                    class="p-2 rounded-xl bg-white/5 hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 border border-white/10 hover:border-amber-500/30 transition cursor-pointer">
+                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                                </svg>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                @elseif($isRejected)
+                                                    {{-- Pulihkan: kembalikan ke Menunggu Verifikasi --}}
+                                                    <form action="{{ route('admin.users.restore', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Pulihkan akun {{ addslashes($user->name) }}? Akun akan kembali berstatus Menunggu Verifikasi.');">
+                                                        @csrf
+                                                        <button type="submit"
+                                                                title="Pulihkan Akun"
+                                                                class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-xs font-semibold transition cursor-pointer flex items-center gap-1">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                            </svg>
+                                                            Pulihkan
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    {{-- Menunggu Verifikasi: Verifikasi / Tolak --}}
                                                     {{-- Verifikasi --}}
                                                     <form action="{{ route('admin.users.verify', $user->id) }}" method="POST" class="inline">
                                                         @csrf
@@ -213,7 +256,7 @@
                                                     </form>
 
                                                     {{-- Tolak --}}
-                                                    <form action="{{ route('admin.users.reject', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Tolak atau tangguhkan verifikasi untuk akun {{ addslashes($user->name) }}?');">
+                                                    <form action="{{ route('admin.users.reject', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Tolak verifikasi untuk akun {{ addslashes($user->name) }}? Akun dapat dipulihkan kembali nanti.');">
                                                         @csrf
                                                         <button type="submit"
                                                                 title="Tolak Verifikasi"
@@ -224,20 +267,6 @@
                                                             Tolak
                                                         </button>
                                                     </form>
-                                                @else
-                                                    {{-- Jika sudah terverifikasi dan bukan akun admin sendiri, sediakan opsi tangguhkan --}}
-                                                    @if(Auth::id() !== $user->id && $roleVal !== 'admin')
-                                                        <form action="{{ route('admin.users.reject', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Tangguhkan akses untuk akun {{ addslashes($user->name) }}? Pengguna tidak akan dapat login sampai diverifikasi kembali.');">
-                                                            @csrf
-                                                            <button type="submit"
-                                                                    title="Tangguhkan Akses"
-                                                                    class="p-2 rounded-xl bg-white/5 hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 border border-white/10 hover:border-amber-500/30 transition cursor-pointer">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                                                                </svg>
-                                                            </button>
-                                                        </form>
-                                                    @endif
                                                 @endif
 
                                                 {{-- Edit Button --}}
