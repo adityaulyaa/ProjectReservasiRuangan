@@ -37,21 +37,24 @@ class UserController extends Controller
 
         if ($statusFilter !== null && $statusFilter !== '') {
             if ($statusFilter === 'verified') {
-                $query->where('is_verified', true);
+                $query->verified();
             } elseif ($statusFilter === 'unverified') {
-                $query->where('is_verified', false);
+                $query->pending();
+            } elseif ($statusFilter === 'rejected') {
+                $query->rejected();
             }
         }
 
-        $users = $query->orderByRaw('is_verified ASC') // Unverified muncul di atas agar admin cepat memproses
+        $users = $query->orderByRaw('is_verified ASC, rejected_at IS NULL DESC') // Menunggu verifikasi muncul di atas
             ->orderBy('id', 'desc')
             ->paginate(15)
             ->withQueryString();
 
         $stats = [
             'total' => User::count(),
-            'unverified' => User::where('is_verified', false)->count(),
-            'verified' => User::where('is_verified', true)->count(),
+            'unverified' => User::pending()->count(),
+            'verified' => User::verified()->count(),
+            'rejected' => User::rejected()->count(),
             'staff' => User::where('role', Role::STAFF->value)->count(),
             'user' => User::where('role', Role::USER->value)->count(),
             'admin' => User::where('role', Role::ADMIN->value)->count(),
@@ -114,6 +117,13 @@ class UserController extends Controller
             unset($validated['password']);
         }
 
+        // Sinkronkan penanda penolakan dengan status verifikasi yang dipilih admin.
+        if (! empty($validated['is_verified'])) {
+            $validated['rejected_at'] = null;
+        } elseif ($user->isPending()) {
+            $validated['rejected_at'] = null;
+        }
+
         $user->update($validated);
 
         return redirect()
@@ -123,23 +133,55 @@ class UserController extends Controller
 
     /**
      * Verifikasi akun hasil registrasi mandiri (set is_verified = true).
+     * Menghapus jejak penolakan jika sebelumnya pernah ditolak.
      */
     public function verify($id): RedirectResponse
     {
         $user = User::findOrFail($id);
-        $user->update(['is_verified' => true]);
+        $user->update([
+            'is_verified' => true,
+            'rejected_at' => null,
+        ]);
 
         return back()->with('success', "Akun '{$user->name}' ({$user->email}) berhasil diverifikasi! Pengguna sekarang dapat login.");
     }
 
     /**
-     * Tolak atau tangguhkan verifikasi akun (set is_verified = false).
+     * Tolak verifikasi akun (set is_verified = false + catat waktu penolakan).
+     * Akun tidak dihapus permanen dan dapat dipulihkan kembali oleh admin.
      */
     public function reject($id): RedirectResponse
     {
         $user = User::findOrFail($id);
-        $user->update(['is_verified' => false]);
 
-        return back()->with('success', "Akun '{$user->name}' ({$user->email}) ditandai belum diverifikasi/ditangguhkan.");
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'Anda tidak dapat menolak akun Anda sendiri.');
+        }
+
+        $user->update([
+            'is_verified' => false,
+            'rejected_at' => now(),
+        ]);
+
+        return back()->with('success', "Akun '{$user->name}' ({$user->email}) telah ditolak. Akun tetap tersimpan dan dapat dipulihkan kembali.");
+    }
+
+    /**
+     * Pulihkan akun yang ditolak menjadi Menunggu Verifikasi (bukan langsung aktif).
+     */
+    public function restore($id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+
+        if (! $user->isRejected()) {
+            return back()->with('error', "Akun '{$user->name}' tidak dalam status ditolak.");
+        }
+
+        $user->update([
+            'is_verified' => false,
+            'rejected_at' => null,
+        ]);
+
+        return back()->with('success', "Akun '{$user->name}' ({$user->email}) berhasil dipulihkan dan kembali menunggu verifikasi.");
     }
 }

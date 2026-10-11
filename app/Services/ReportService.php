@@ -7,6 +7,7 @@ use App\Enums\ReportStatus;
 use App\Models\Facility;
 use App\Models\Report;
 use App\Models\ReportLog;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -44,7 +45,7 @@ class ReportService
      * Ubah status laporan sesuai transisi yang valid (SRS-15).
      * new → in_progress; new/in_progress → resolved|rejected (wajib note).
      * Note wajib ketika status tujuan resolved atau rejected.
-     * Otomatis mengaktifkan fasilitas jika tidak ada laporan under_repair lainnya.
+     * Sinkronisasi status fasilitas dijalankan dalam satu transaksi database.
      *
      * @throws ValidationException
      */
@@ -84,73 +85,112 @@ class ReportService
 
         $oldStatus = $current->value;
 
-        $report->update([
-            'status' => $status->value,
-            'resolution_note' => $note,
-            'processed_by' => $actorId,
-        ]);
+        DB::transaction(function () use ($report, $status, $note, $actorId, $oldStatus) {
+            $report->update([
+                'status' => $status->value,
+                'resolution_note' => $note,
+                'processed_by' => $actorId,
+            ]);
 
-        // Sinkronisasi status fasilitas otomatis
-        if (in_array($status, [ReportStatus::RESOLVED, ReportStatus::REJECTED], true)) {
-            // Cek apakah masih ada laporan under_repair lain untuk fasilitas yang sama
-            $hasOtherUnderRepair = Report::where('facility_id', $report->facility_id)
-                ->where('id', '!=', $report->id)
-                ->where('status', ReportStatus::UNDER_REPAIR->value)
-                ->exists();
-
-            // Jika tidak ada lagi laporan under_repair, aktifkan fasilitas
-            if (! $hasOtherUnderRepair) {
-                Facility::where('id', $report->facility_id)->update([
-                    'status' => FacilityStatus::ACTIVE->value,
-                ]);
+            // Sinkronisasi status fasilitas otomatis.
+            // Hanya saat laporan selesai/ditolak: cek ulang apakah fasilitas
+            // layak dikembalikan ke status tersedia.
+            if (in_array($status, [ReportStatus::RESOLVED, ReportStatus::REJECTED], true)) {
+                $this->syncFacilityAvailability($report->facility_id);
             }
+
+            $action = match ($status) {
+                ReportStatus::IN_PROGRESS => 'in_progress',
+                ReportStatus::UNDER_REPAIR => 'under_repair',
+                ReportStatus::RESOLVED => 'resolved',
+                ReportStatus::REJECTED => 'rejected',
+                default => 'status_changed',
+            };
+
+            $this->createLog($report, $action, $oldStatus, $status->value, $note, $actorId);
+        });
+    }
+
+    /**
+     * Sinkronkan status fasilitas berdasarkan seluruh laporan aktif yang tersisa.
+     *
+     * - Jika masih ada laporan aktif (new/in_progress/under_repair), fasilitas
+     *   dipertahankan pada status maintenance (tidak boleh dipakai).
+     * - Jika tidak ada laporan aktif, fasilitas layak dikembalikan ke active,
+     *   kecuali admin telah menonaktifkannya secara permanen (inactive).
+     */
+    public function syncFacilityAvailability(int $facilityId): void
+    {
+        $facility = Facility::find($facilityId);
+
+        if (! $facility) {
+            return;
         }
 
-        $action = match ($status) {
-            ReportStatus::IN_PROGRESS => 'in_progress',
-            ReportStatus::UNDER_REPAIR => 'under_repair',
-            ReportStatus::RESOLVED => 'resolved',
-            ReportStatus::REJECTED => 'rejected',
-            default => 'status_changed',
-        };
+        // Jangan pernah mengaktifkan fasilitas yang dinonaktifkan admin.
+        if ($facility->status === FacilityStatus::INACTIVE) {
+            return;
+        }
 
-        $this->createLog($report, $action, $oldStatus, $status->value, $note, $actorId);
+        $hasActiveReport = Report::where('facility_id', $facilityId)
+            ->whereIn('status', [
+                ReportStatus::NEW->value,
+                ReportStatus::IN_PROGRESS->value,
+                ReportStatus::UNDER_REPAIR->value,
+            ])
+            ->exists();
+
+        $targetStatus = $hasActiveReport
+            ? FacilityStatus::MAINTENANCE
+            : FacilityStatus::ACTIVE;
+
+        if ($facility->status !== $targetStatus) {
+            $facility->update(['status' => $targetStatus->value]);
+        }
     }
 
     /**
      * Tandai fasilitas berstatus 'maintenance' terkait laporan kerusakan.
      * Juga ubah status laporan menjadi 'under_repair'.
+     * Fasilitas yang dinonaktifkan admin tidak diubah statusnya.
      */
     public function markFacilityMaintenance(Report $report, int $actorId): void
     {
-        Facility::where('id', $report->facility_id)->update([
-            'status' => FacilityStatus::MAINTENANCE->value,
-        ]);
+        DB::transaction(function () use ($report, $actorId) {
+            $facility = Facility::find($report->facility_id);
 
-        $oldStatus = $report->status->value;
+            // Hormati status inactive yang ditetapkan admin.
+            if ($facility && $facility->status !== FacilityStatus::INACTIVE) {
+                $facility->update(['status' => FacilityStatus::MAINTENANCE->value]);
+            }
 
-        $report->update([
-            'status' => ReportStatus::UNDER_REPAIR->value,
-            'processed_by' => $actorId,
-        ]);
+            $oldStatus = $report->status->value;
 
-        $this->createLog(
-            $report,
-            'maintenance_marked',
-            $oldStatus,
-            ReportStatus::UNDER_REPAIR->value,
-            'Fasilitas ditandai sedang dalam perbaikan',
-            $actorId
-        );
+            $report->update([
+                'status' => ReportStatus::UNDER_REPAIR->value,
+                'processed_by' => $actorId,
+            ]);
+
+            $this->createLog(
+                $report,
+                'maintenance_marked',
+                $oldStatus,
+                ReportStatus::UNDER_REPAIR->value,
+                'Fasilitas ditandai sedang dalam perbaikan',
+                $actorId
+            );
+        });
     }
 
     /**
      * Kembalikan fasilitas ke status 'active' setelah selesai diperbaiki.
+     * Tidak akan mengaktifkan fasilitas yang masih memiliki laporan aktif
+     * maupun fasilitas yang dinonaktifkan admin.
      */
     public function markFacilityActive(int $facilityId): void
     {
-        Facility::where('id', $facilityId)->update([
-            'status' => FacilityStatus::ACTIVE->value,
-        ]);
+        DB::transaction(function () use ($facilityId) {
+            $this->syncFacilityAvailability($facilityId);
+        });
     }
 }

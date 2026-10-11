@@ -45,8 +45,20 @@
                             <p class="text-xs text-slate-400 mt-1">Perbarui data profil, peran, atau status verifikasi pengguna.</p>
                         </div>
                         <div>
-                            <span class="text-xs px-3 py-1 rounded-full border {{ $user->is_verified ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30' }}">
-                                {{ $user->is_verified ? '✓ Terverifikasi' : '⏳ Menunggu Verifikasi' }}
+                            @php
+                                $statusBadgeClass = $user->isVerified()
+                                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                                    : ($user->isRejected()
+                                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                                        : 'bg-amber-500/20 text-amber-300 border-amber-500/30');
+                                $statusBadgeLabel = match ($user->statusLabel()) {
+                                    'Terverifikasi' => '✓ Terverifikasi',
+                                    'Ditolak' => '✕ Ditolak',
+                                    default => '⏳ Menunggu Verifikasi',
+                                };
+                            @endphp
+                            <span class="text-xs px-3 py-1 rounded-full border {{ $statusBadgeClass }}">
+                                {{ $statusBadgeLabel }}
                             </span>
                         </div>
                     </div>

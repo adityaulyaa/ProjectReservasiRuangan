@@ -63,6 +63,7 @@
                                         $badgeClasses = [
                                             'new' => 'bg-rose-500/20 text-rose-300 border-rose-500/30',
                                             'in_progress' => 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+                                            'under_repair' => 'bg-orange-500/20 text-orange-300 border-orange-500/30',
                                             'resolved' => 'bg-teal-500/20 text-teal-300 border-teal-500/30',
                                             'rejected' => 'bg-slate-500/20 text-slate-300 border-slate-500/30',
                                         ][$statusValue] ?? 'bg-white/10 text-slate-300 border-white/20';
@@ -70,6 +71,7 @@
                                         $badgeLabels = [
                                             'new' => 'Baru',
                                             'in_progress' => 'Sedang Diproses',
+                                            'under_repair' => 'Sedang Diperbaiki',
                                             'resolved' => 'Selesai',
                                             'rejected' => 'Ditolak',
                                         ][$statusValue] ?? ucfirst($statusValue);

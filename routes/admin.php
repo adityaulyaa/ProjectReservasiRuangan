@@ -19,6 +19,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::post('users/{id}/verify', [UserController::class, 'verify'])->name('users.verify');
     Route::post('users/{id}/reject', [UserController::class, 'reject'])->name('users.reject');
+    Route::post('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
 
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');

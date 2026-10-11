@@ -21,7 +21,62 @@
         </div>
     </x-slot>
 
-    <div class="py-10">
+    <div class="py-10" x-data="{
+            confirmOpen: false,
+            confirmUrl: '',
+            confirmType: 'reject',
+            confirmName: '',
+            confirmLoading: false,
+            confirmError: '',
+            openConfirm(url, type, name) {
+                this.confirmUrl = url;
+                this.confirmType = type;
+                this.confirmName = name;
+                this.confirmError = '';
+                this.confirmLoading = false;
+                this.confirmOpen = true;
+            },
+            closeConfirm() {
+                if (this.confirmLoading) return;
+                this.confirmOpen = false;
+                this.confirmError = '';
+            },
+            async submitConfirm() {
+                if (this.confirmLoading) return;
+                this.confirmLoading = true;
+                this.confirmError = '';
+                try {
+                    const body = new FormData();
+                    body.append('_token', this.$refs.csrf.value);
+                    const response = await fetch(this.confirmUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body,
+                    });
+
+                    if (response.ok || response.redirected) {
+                        this.confirmOpen = false;
+                        window.location.reload();
+                        return;
+                    }
+
+                    let message = 'Gagal memproses permintaan. Silakan coba lagi.';
+                    try {
+                        const data = await response.json();
+                        if (data && data.message) message = data.message;
+                    } catch (e) {}
+                    this.confirmError = message;
+                    this.confirmLoading = false;
+                } catch (e) {
+                    this.confirmError = 'Terjadi kesalahan jaringan. Silakan coba lagi.';
+                    this.confirmLoading = false;
+                }
+            }
+        }">
+        <input type="hidden" x-ref="csrf" value="{{ csrf_token() }}">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             {{-- Flash Messages --}}
@@ -44,7 +99,7 @@
             @endif
 
             {{-- Stat Cards --}}
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 <a href="{{ route('admin.users.index') }}" class="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-teal-500/40 transition">
                     <div class="text-xs text-slate-400 font-medium">Total Akun</div>
                     <div class="text-2xl font-bold text-white mt-1">{{ $stats['total'] }}</div>
@@ -59,6 +114,12 @@
                     </div>
                     <div class="text-2xl font-bold text-amber-300 mt-1">{{ $stats['unverified'] }}</div>
                     <div class="text-[11px] text-amber-200/60 mt-0.5">Registrasi mandiri</div>
+                </a>
+
+                <a href="{{ route('admin.users.index', ['status' => 'rejected']) }}" class="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 hover:border-rose-500/50 transition">
+                    <div class="text-xs text-rose-300 font-medium">Ditolak</div>
+                    <div class="text-2xl font-bold text-rose-300 mt-1">{{ $stats['rejected'] }}</div>
+                    <div class="text-[11px] text-rose-200/60 mt-0.5">Dapat dipulihkan</div>
                 </a>
 
                 <a href="{{ route('admin.users.index', ['role' => 'staff']) }}" class="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 hover:border-teal-500/40 transition">
@@ -100,6 +161,7 @@
                             <option value="">Semua Status</option>
                             <option value="unverified" {{ ($statusFilter ?? '') === 'unverified' ? 'selected' : '' }}>Menunggu Verifikasi</option>
                             <option value="verified" {{ ($statusFilter ?? '') === 'verified' ? 'selected' : '' }}>Terverifikasi (Aktif)</option>
+                            <option value="rejected" {{ ($statusFilter ?? '') === 'rejected' ? 'selected' : '' }}>Ditolak</option>
                         </select>
 
                         <button type="submit" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-sm font-semibold text-white transition cursor-pointer">
@@ -141,8 +203,10 @@
                                             default => 'bg-slate-500/20 text-slate-300 border-slate-500/30',
                                         };
                                         $roleLabel = is_object($user->role) ? $user->role->label() : ucfirst($user->role);
+                                        $isVerified = $user->isVerified();
+                                        $isRejected = $user->isRejected();
                                     @endphp
-                                    <tr class="hover:bg-white/[0.02] transition {{ ! $user->is_verified ? 'bg-amber-500/[0.03]' : '' }}">
+                                    <tr class="hover:bg-white/[0.02] transition {{ $isRejected ? 'bg-rose-500/[0.03]' : (! $isVerified ? 'bg-amber-500/[0.03]' : '') }}">
                                         {{-- Name & Avatar --}}
                                         <td class="py-4 px-6">
                                             <div class="flex items-center gap-3">
@@ -172,12 +236,19 @@
 
                                         {{-- Verification Status --}}
                                         <td class="py-4 px-6">
-                                            @if($user->is_verified)
+                                            @if($isVerified)
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                                                     <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                                     </svg>
                                                     Terverifikasi
+                                                </span>
+                                            @elseif($isRejected)
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+                                                    <svg class="w-3.5 h-3.5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                    Ditolak
                                                 </span>
                                             @else
                                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30">
@@ -197,8 +268,31 @@
                                         {{-- Action Buttons --}}
                                         <td class="py-4 px-6 text-right">
                                             <div class="inline-flex items-center gap-2">
-                                                {{-- Tombol Verifikasi / Tolak jika unverified --}}
-                                                @if(! $user->is_verified)
+                                                @if($isVerified)
+                                                    {{-- Jika sudah terverifikasi dan bukan akun admin sendiri, sediakan opsi tangguhkan --}}
+                                                    @if(Auth::id() !== $user->id && $roleVal !== 'admin')
+                                                        <button type="button"
+                                                                title="Tangguhkan Akses"
+                                                                @click="openConfirm('{{ route('admin.users.reject', $user->id) }}', 'reject', '{{ addslashes($user->name) }}')"
+                                                                class="p-2 rounded-xl bg-white/5 hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 border border-white/10 hover:border-amber-500/30 transition cursor-pointer">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                            </svg>
+                                                        </button>
+                                                    @endif
+                                                @elseif($isRejected)
+                                                    {{-- Pulihkan: kembalikan ke Menunggu Verifikasi --}}
+                                                    <button type="button"
+                                                            title="Pulihkan Akun"
+                                                            @click="openConfirm('{{ route('admin.users.restore', $user->id) }}', 'restore', '{{ addslashes($user->name) }}')"
+                                                            class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-xs font-semibold transition cursor-pointer flex items-center gap-1">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                        </svg>
+                                                        Pulihkan
+                                                    </button>
+                                                @else
+                                                    {{-- Menunggu Verifikasi: Verifikasi / Tolak --}}
                                                     {{-- Verifikasi --}}
                                                     <form action="{{ route('admin.users.verify', $user->id) }}" method="POST" class="inline">
                                                         @csrf
@@ -213,31 +307,15 @@
                                                     </form>
 
                                                     {{-- Tolak --}}
-                                                    <form action="{{ route('admin.users.reject', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Tolak atau tangguhkan verifikasi untuk akun {{ addslashes($user->name) }}?');">
-                                                        @csrf
-                                                        <button type="submit"
-                                                                title="Tolak Verifikasi"
-                                                                class="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-semibold transition cursor-pointer flex items-center gap-1">
-                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                            </svg>
-                                                            Tolak
-                                                        </button>
-                                                    </form>
-                                                @else
-                                                    {{-- Jika sudah terverifikasi dan bukan akun admin sendiri, sediakan opsi tangguhkan --}}
-                                                    @if(Auth::id() !== $user->id && $roleVal !== 'admin')
-                                                        <form action="{{ route('admin.users.reject', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Tangguhkan akses untuk akun {{ addslashes($user->name) }}? Pengguna tidak akan dapat login sampai diverifikasi kembali.');">
-                                                            @csrf
-                                                            <button type="submit"
-                                                                    title="Tangguhkan Akses"
-                                                                    class="p-2 rounded-xl bg-white/5 hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 border border-white/10 hover:border-amber-500/30 transition cursor-pointer">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                                                                </svg>
-                                                            </button>
-                                                        </form>
-                                                    @endif
+                                                    <button type="button"
+                                                            title="Tolak Verifikasi"
+                                                            @click="openConfirm('{{ route('admin.users.reject', $user->id) }}', 'reject', '{{ addslashes($user->name) }}')"
+                                                            class="px-3 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/30 text-xs font-semibold transition cursor-pointer flex items-center gap-1">
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                        Tolak
+                                                    </button>
                                                 @endif
 
                                                 {{-- Edit Button --}}
@@ -283,6 +361,100 @@
                 @endif
             </div>
 
+        </div>
+
+        {{-- Custom Confirmation Modal (Tolak / Pulihkan Akun) --}}
+        <div x-show="confirmOpen" x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+             @keydown.escape.window="closeConfirm()">
+            <div x-show="confirmOpen"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 @click.outside="closeConfirm()"
+                 role="dialog" aria-modal="true"
+                 class="w-full max-w-md bg-slate-900 border border-white/15 rounded-3xl shadow-2xl p-6">
+                <div class="flex items-center gap-3 mb-4"
+                     :class="confirmType === 'restore' ? 'text-sky-400' : 'text-rose-400'">
+                    <div class="w-10 h-10 rounded-2xl border flex items-center justify-center shrink-0"
+                         :class="confirmType === 'restore' ? 'bg-sky-500/20 border-sky-500/30' : 'bg-rose-500/20 border-rose-500/30'">
+                        {{-- Warning / Restore icon --}}
+                        <svg x-show="confirmType !== 'restore'" class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <svg x-show="confirmType === 'restore'" class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-white"
+                        x-text="confirmType === 'restore' ? 'Pulihkan Akun?' : 'Tolak Verifikasi Akun?'"></h3>
+                </div>
+
+                <p class="text-sm text-slate-300 leading-relaxed mb-4">
+                    <template x-if="confirmType === 'restore'">
+                        <span>Akun ini akan dikembalikan ke status
+                            <span class="font-semibold text-amber-300">Menunggu Verifikasi</span>
+                            dan dapat diverifikasi kembali oleh admin.
+                        </span>
+                    </template>
+                    <template x-if="confirmType !== 'restore'">
+                        <span>Akun ini akan ditandai
+                            <span class="font-semibold text-rose-300">Ditolak</span>
+                            dan pengguna tidak dapat login. Akun tetap tersimpan dan dapat dipulihkan kembali nanti.
+                        </span>
+                    </template>
+                </p>
+
+                {{-- Info akun yang akan diproses --}}
+                <div class="rounded-2xl bg-white/5 border border-white/10 p-4 mb-6 flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center font-bold text-white shrink-0 text-sm"
+                         x-text="confirmName ? confirmName.trim().charAt(0).toUpperCase() : '?'"></div>
+                    <div class="min-w-0">
+                        <span class="block text-[11px] text-slate-400 font-medium">Akun yang diproses</span>
+                        <span class="block font-semibold text-white text-sm truncate" x-text="confirmName"></span>
+                    </div>
+                </div>
+
+                {{-- Error state --}}
+                <div x-show="confirmError" x-cloak
+                     class="mb-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 p-3 text-xs text-rose-300 flex items-start gap-2">
+                    <svg class="w-4 h-4 text-rose-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span x-text="confirmError"></span>
+                </div>
+
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                    <button type="button"
+                            @click="closeConfirm()"
+                            :disabled="confirmLoading"
+                            class="px-4 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-slate-200 text-sm font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+                        Batal
+                    </button>
+                    <button type="button"
+                            @click="submitConfirm()"
+                            :disabled="confirmLoading"
+                            class="inline-flex items-center justify-center gap-2 px-5 py-2 text-white font-semibold text-sm rounded-xl shadow-lg transition cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                            :class="confirmType === 'restore' ? 'bg-sky-600 hover:bg-sky-500 shadow-sky-600/20' : 'bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 shadow-rose-600/20'">
+                        <svg x-show="confirmLoading" x-cloak class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <span x-text="confirmLoading
+                            ? 'Memproses...'
+                            : (confirmType === 'restore' ? 'Ya, Pulihkan Akun' : 'Ya, Tolak Akun')"></span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>
