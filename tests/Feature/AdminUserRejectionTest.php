@@ -232,4 +232,48 @@ class AdminUserRejectionTest extends TestCase
         $this->get('/reservations/create')->assertRedirect('/login');
         $this->get('/reports')->assertRedirect('/login');
     }
+
+    // ─── Custom Confirmation Modal ───
+
+    public function test_index_uses_custom_modal_instead_of_browser_confirm(): void
+    {
+        $admin = $this->createAdmin();
+        $pending = $this->createPendingUser(['name' => 'Calon Tolak']);
+        $rejected = $this->createPendingUser(['name' => 'Sudah Ditolak']);
+        $this->actingAs($admin)->post("/admin/users/{$rejected->id}/reject");
+
+        $response = $this->actingAs($admin)->get('/admin/users');
+
+        $response->assertOk();
+        // Tidak lagi memakai dialog bawaan browser
+        $response->assertDontSee('window.confirm');
+        $response->assertDontSee('onsubmit="return confirm(', false);
+
+        // Trigger modal kustom + konten modal
+        $response->assertSee('openConfirm');
+        $response->assertSee('submitConfirm');
+        $response->assertSee('Tolak Verifikasi Akun?');
+        $response->assertSee('Ya, Tolak Akun');
+        $response->assertSee('Ya, Pulihkan Akun');
+        $response->assertSee('Batal');
+
+        // Info nama akun yang akan diproses tersedia
+        $response->assertSee('Calon Tolak');
+        $response->assertSee('Sudah Ditolak');
+    }
+
+    public function test_modal_esc_and_loading_controls_present(): void
+    {
+        $admin = $this->createAdmin();
+        $this->createPendingUser(['name' => 'Baris Uji']);
+
+        $response = $this->actingAs($admin)->get('/admin/users');
+
+        $response->assertOk();
+        // Dukungan tombol Escape + overlay center + loading state
+        $response->assertSee('keydown.escape.window', false);
+        $response->assertSee('fixed inset-0 z-50 flex items-center justify-center', false);
+        $response->assertSee('confirmLoading', false);
+        $response->assertSee('Memproses...');
+    }
 }
